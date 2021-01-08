@@ -46,6 +46,7 @@ class Phonetizer():
         self.text_raw = []
         self.text_phoneme = []
         self.text_structure = []
+        self.text_syllables = []
 
     def word2phonemes(self, word):
         phonemes = word.lower()
@@ -67,19 +68,40 @@ class Phonetizer():
 
         return structure
 
+    def syllables_per_word(self, structure):
+        structure = list(structure)
+        for i in range(len(structure) - 1):
+            try:
+                if structure[i] == structure[i+1]:
+                    structure.pop(i)
+            except IndexError:
+                break
+        structure = ''.join(structure)
+        number_syllables = structure.count('V')
+
+        return number_syllables
+
     def text2structure(self):
         if self.text_raw == None:
             raise AttributeError('pass a txt file to read first')
         for sentence in range(len(self.text_raw)):
             sentence_structure = []
             sentence_phonemes = []
+            sentence_syllables = []
+
             for word in self.text_raw[sentence]:
                 phonemes = self.word2phonemes(word)
                 sentence_phonemes.append(phonemes)
+
                 structure = self.phonemes2structure(phonemes)
                 sentence_structure.append(structure)
+
+                number_syllables = self.syllables_per_word(structure)
+                sentence_syllables.append(number_syllables)
+
             self.text_phoneme.append(sentence_phonemes)
             self.text_structure.append(sentence_structure)
+            self.text_syllables.append(sentence_syllables)
 
         return
 
@@ -92,10 +114,11 @@ class Phonetizer():
     def print_structure(self, n):
         for i in range(n):
             try:
-                print(list(zip(self.text_raw[i], self.text_phoneme[i], self.text_structure[i])))
+                print(list(zip(self.text_raw[i], self.text_phoneme[i], self.text_structure[i], self.text_syllables[i])))
             except IndexError:
                 print(f'given index greater than number of lines in the text:\
                 number of lines: {len(self.text_structure)} -- index: {n}')
+
 
 phonetizer1 = Phonetizer(vowels, consonants, char2phone)
 phonetizer1.read_txt('cuento1.txt')

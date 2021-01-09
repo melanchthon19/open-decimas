@@ -34,15 +34,20 @@ char2phone = {
        'v': 'b',
        'y': 'i'}
        }
-list_of_words = ['ala', 'árbol', 'abstener', 'dilema', 'lanza', 'lluvia',
-                     'constar', 'cráter', 'blanco', 'transbordo', 'piano', 'cielo',
-                     'hielo', 'aula', 'melocotón', 'salchicha', 'alguacíl']
+
+# sinéresis: dos vocales que no forman diptongo, forman diptongo. (e.g. gor-je-ar --> gor-jear)
+# diéresis: se separan dos vocales que forman diptongo. (e.g. sua-ve --> su-a-ve)
+# sinalefa: dos vocales de palabras contiguas se diptonguean. (e.g. es-ta-ba-e-cha-do --> es-ta-bae-cha-do)
+# reglas de acentuación:
+#   1) verso terminada en palabra aguda --> +1
+#   2) verso terminada en palabra grave --> +0
+#   3) verso terminada en palabra esdrújula --> -1
 
 class Phonetizer():
     def __init__(self, vowels, consonants, char2phone):
         self.vowels = vowels
         self.consonants = consonants
-        self.char2phone = char2phone
+        self.char2phone = char2phone  # hierarchical rules to chage characters to phones
         self.text_raw = []
         self.text_phoneme = []
         self.text_structure = []
@@ -89,7 +94,8 @@ class Phonetizer():
             sentence_phonemes = []
             sentence_syllables = []
 
-            for word in self.text_raw[sentence]:
+            for i, word in enumerate(self.text_raw[sentence]):
+                if i == len
                 phonemes = self.word2phonemes(word)
                 sentence_phonemes.append(phonemes)
 
@@ -111,13 +117,21 @@ class Phonetizer():
         # add further preprocessing to get rid of empty lines
         self.text_raw = [line.strip().split() for line in text]
 
+        return
+
     def print_structure(self, n):
         for i in range(n):
             try:
-                print(list(zip(self.text_raw[i], self.text_phoneme[i], self.text_structure[i], self.text_syllables[i])))
+                print(list(zip(self.text_raw[i], \
+                               self.text_phoneme[i], \
+                               self.text_structure[i], \
+                               self.text_syllables[i])), \
+                               sum([number for number in self.text_syllables[i]]))
             except IndexError:
                 print(f'given index greater than number of lines in the text:\
                 number of lines: {len(self.text_structure)} -- index: {n}')
+
+        return
 
 
 phonetizer1 = Phonetizer(vowels, consonants, char2phone)
@@ -128,4 +142,4 @@ phonetizer1.print_structure(3)
 phonetizer2 = Phonetizer(vowels, consonants, char2phone)
 phonetizer2.read_txt('decima1.txt')
 phonetizer2.text2structure()
-#phonetizer2.print_structure(15)
+phonetizer2.print_structure(3)

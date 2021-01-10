@@ -3,18 +3,18 @@
 
 import pandas as pd
 import re
+import sys
 
-vowels = ['a', 'á', 'e', 'é', 'i', 'í', 'o', 'ó', 'u', 'ú', 'ü']
-vowels_dict = {1:'a', 2: 'e', 3: 'i', 4:'o', 5:'u',
-           6:'á', 7: 'é', 8:'í', 9:'ó', 10:'ú',
-           11:'ü'}
-vowels_strongh = [1, 2, 4, 6, 7, 8, 9, 10]
-
-consonants = ['m', 'n', 'ñ',
-               'p', 't', 'k', 'b', 'd', 'g',
-               'C',
-               'f', 's', 'L', 'x',
-               'l', 'r', 'R']
+vowels_strong = {'a':'F', 'á':'F', 'e':'F', 'é':'F', 'í':'F', 'o':'F', 'ó':'F', 'ú':'F'}
+vowels_weak = {'i':'D', 'u':'D', 'ü':'D'}
+consonants = {'m':'C', 'n':'C', 'ñ':'C',
+              'p':'C', 't':'C', 'k':'C', 'b':'C', 'd':'C', 'g':'C',
+              'C':'C',
+              'f':'C', 's':'C', 'L':'C', 'x':'C',
+              'l':'C', 'r':'C', 'R':'C'}
+vowels = list(vowels_strong.keys()) + list(vowels_weak.keys())
+alphabet = list(vowels_strong.keys()) + list(vowels_weak.keys()) + list(consonants.keys())
+phonemes_dict = {**vowels_strong, **vowels_weak, **consonants}
 
 char2phone = {
        1:{
@@ -23,7 +23,9 @@ char2phone = {
        'ce': 'se',
        'cé': 'sé',
        'ch': 'C',
-       'qu': 'k'},
+       'qu': 'k',
+       'gui': 'gi',
+       'gue': 'ge'},
        2:{
        'c': 'k',
        'll': 'L',
@@ -55,7 +57,7 @@ class Phonetizer():
 
     def word2phonemes(self, word):
         phonemes = word.lower()
-        for rule in self.char2phone.keys():  # certain rules are applied first than others
+        for rule in self.char2phone.keys():  # certain rules must be applied first
             for char in self.char2phone[rule]:
                 if char in phonemes:
                     # modifying the word on the fly
@@ -64,24 +66,21 @@ class Phonetizer():
         return phonemes
 
     def phonemes2structure(self, phonemes):
-        structure = ''
-        for phone in phonemes:
-            if phone in consonants:
-                structure += 'C'
-            if phone in vowels:
-                structure += 'V'
-
+        structure = [phonemes_dict[phone] for phone in phonemes if phone in alphabet]
+        print(phonemes, structure)
         return structure
 
     def syllables_per_word(self, structure):
-        structure = list(structure)
+        # a copy of structure is being passed
         for i in range(len(structure) - 1):
             try:
                 if structure[i] == structure[i+1]:
                     structure.pop(i)
             except IndexError:
+                # add catch block to handle out-of-language words
                 break
         structure = ''.join(structure)
+        print(structure)
         number_syllables = structure.count('V')
 
         return number_syllables
@@ -95,14 +94,13 @@ class Phonetizer():
             sentence_syllables = []
 
             for i, word in enumerate(self.text_raw[sentence]):
-                if i == len
                 phonemes = self.word2phonemes(word)
                 sentence_phonemes.append(phonemes)
 
                 structure = self.phonemes2structure(phonemes)
                 sentence_structure.append(structure)
 
-                number_syllables = self.syllables_per_word(structure)
+                number_syllables = self.syllables_per_word(structure[:])
                 sentence_syllables.append(number_syllables)
 
             self.text_phoneme.append(sentence_phonemes)
@@ -137,9 +135,9 @@ class Phonetizer():
 phonetizer1 = Phonetizer(vowels, consonants, char2phone)
 phonetizer1.read_txt('cuento1.txt')
 phonetizer1.text2structure()
-phonetizer1.print_structure(3)
+#phonetizer1.print_structure(3)
 
 phonetizer2 = Phonetizer(vowels, consonants, char2phone)
 phonetizer2.read_txt('decima1.txt')
 phonetizer2.text2structure()
-phonetizer2.print_structure(3)
+#phonetizer2.print_structure(3)

@@ -90,6 +90,24 @@ class Phonetizer():
 
         return number_syllables
 
+
+    def add_extra_consonant(self, structure):
+        structure = re.sub(r'([FD]{3})', r'\1C\1', structure)
+        return structure
+
+    def syllables_per_sentence(self, sentence_structure):
+        sentence_structure = ''.join([s for word_structure in sentence_structure for s in word_structure])
+        #number_vowels = [vowel for vowel in sentence_structure.split('C') if vowel]
+        #number_vowels = [vowel.split('A')] for
+        #print(sentence_structure)
+        sentence_structure = self.add_extra_consonant(sentence_structure)
+        vowels = re.split('C', sentence_structure)
+        #print(vowels)
+
+        number_syllables = len(vowels)
+
+        return number_syllables
+
     def text2structure(self):
         if self.text_raw == None:
             raise AttributeError('pass a txt file to read first')
@@ -97,6 +115,9 @@ class Phonetizer():
         self.last_words = {i:'' for i in range(len(self.text_raw))}
 
         for sentence in range(len(self.text_raw)):
+            if self.text_raw[sentence] == []:
+                continue
+            #print(self.text_raw[sentence])
             sentence_phonemes = []
             sentence_structure = []
             sentence_syllables = []
@@ -107,18 +128,20 @@ class Phonetizer():
 
                 structure = self.phonemes2structure(phonemes)
                 sentence_structure.append(structure)
-                #print(phonemes, structure)
-                if i == len(self.text_raw[sentence]) - 1:  # processing the last word
-                    last_word = self.metric_rule(phonemes, structure)
-                else:
-                    last_word = 0
 
-                number_syllables = self.syllables_per_word(structure[:])
-                sentence_syllables.append(number_syllables + last_word)
+            print(self.text_raw[sentence])
+            number_syllables = self.syllables_per_sentence(sentence_structure[:])  # passing a copy of the list
+            last_word = (sentence_phonemes[-1], sentence_structure[-1])
+            #print(self.text_raw[sentence], number_syllables + self.metric_rule(last_word))
+            sentence_syllables.append(number_syllables + self.metric_rule(last_word))
 
             self.text_phoneme.append(sentence_phonemes)
             self.text_structure.append(sentence_structure)
             self.text_syllables.append(sentence_syllables)
+            print(self.text_raw[sentence])
+            print(self.text_phoneme[-1])
+            print(self.text_structure[-1])
+            print(self.text_syllables[-1])
 
         return
 
@@ -139,7 +162,8 @@ class Phonetizer():
             else:
                 return 'aguda'
 
-    def metric_rule(self, phonemes, structure):
+    def metric_rule(self, last_word):
+        phonemes, structure = last_word
         accent = self.acentuacion(phonemes, structure)
         #print(phonemes, structure, accent)
         if accent == 'aguda':
@@ -152,8 +176,8 @@ class Phonetizer():
     def read_txt(self, file):
         with open(file, 'r') as f:
             text = f.readlines()
-        # add further preprocessing to get rid of empty lines
-        self.text_raw = [line.strip().split() for line in text]
+        # add further preprocessing to get rid of empty lines and non-alphabetic characters.
+        self.text_raw = [line.lower().strip().split() for line in text]
 
         return
 
@@ -163,8 +187,8 @@ class Phonetizer():
                 print(list(zip(self.text_raw[i], \
                                self.text_phoneme[i], \
                                self.text_structure[i], \
-                               self.text_syllables[i])), \
-                               sum([number for number in self.text_syllables[i]]))
+                               self.text_syllables[i])))#, \
+                               #sum([number for number in self.text_syllables[i]]))
             except IndexError:
                 print(f'given index greater than number of lines in the text:\
                 number of lines: {len(self.text_structure)} -- index: {n}')
@@ -172,16 +196,16 @@ class Phonetizer():
         return
 
 
-phonetizer1 = Phonetizer(vowels, consonants, char2phone)
-phonetizer1.read_txt('cuento1.txt')
-phonetizer1.text2structure()
+#phonetizer1 = Phonetizer(vowels, consonants, char2phone)
+#phonetizer1.read_txt('cuento1.txt')
+#phonetizer1.text2structure()
 #phonetizer1.print_structure(3)
 
 phonetizer2 = Phonetizer(vowels, consonants, char2phone)
 phonetizer2.read_txt('decima1.txt')
 phonetizer2.text2structure()
-#phonetizer2.print_structure(3)
 
 phonetizer2 = Phonetizer(vowels, consonants, char2phone)
 phonetizer2.read_txt('decima2.txt')
 phonetizer2.text2structure()
+#phonetizer2.print_structure(3)

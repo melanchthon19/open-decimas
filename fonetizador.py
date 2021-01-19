@@ -41,7 +41,7 @@ char2phone = {
 
 # sinéresis: dos vocales que no forman diptongo, forman diptongo. (e.g. gor-je-ar --> gor-jear)
 # diéresis: se separan dos vocales que forman diptongo. (e.g. sua-ve --> su-a-ve)
-# sinalefa: dos vocales de palabras contiguas se diptonguean. (e.g. es-ta-ba-e-cha-do --> es-ta-bae-cha-do)
+# sinalefa: dos vocales de palabras contiguas se diptonguean. (e.g. cie-lo-y-mar --> cie-loy-mar)
 # reglas de acentuación:
 #   1) verso terminada en palabra aguda --> +1
 #   2) verso terminada en palabra grave --> +0
@@ -77,6 +77,7 @@ class Phonetizer():
 
     def syllables_per_word(self, structure):
         # a copy of structure is being passed
+        print('structure', structure)
         for i in range(len(structure) - 1):
             try:
                 if structure[i] == structure[i+1]:
@@ -96,8 +97,8 @@ class Phonetizer():
         self.last_words = {i:'' for i in range(len(self.text_raw))}
 
         for sentence in range(len(self.text_raw)):
-            sentence_structure = []
             sentence_phonemes = []
+            sentence_structure = []
             sentence_syllables = []
 
             for i, word in enumerate(self.text_raw[sentence]):
@@ -140,7 +141,7 @@ class Phonetizer():
 
     def metric_rule(self, phonemes, structure):
         accent = self.acentuacion(phonemes, structure)
-        print(phonemes, structure, accent)
+        #print(phonemes, structure, accent)
         if accent == 'aguda':
             return +1
         elif accent == 'grave':
@@ -180,6 +181,7 @@ phonetizer2 = Phonetizer(vowels, consonants, char2phone)
 phonetizer2.read_txt('decima1.txt')
 phonetizer2.text2structure()
 #phonetizer2.print_structure(3)
+
 phonetizer2 = Phonetizer(vowels, consonants, char2phone)
 phonetizer2.read_txt('decima2.txt')
 phonetizer2.text2structure()

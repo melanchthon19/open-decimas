@@ -129,7 +129,8 @@ class Phonetizer():
         return
 
     def acentuacion(self, phonemes, structure):
-        #if any(char in phonemes for char in vowels_accented):
+        # add if monosílabo
+        
         if 'A' in structure:
             pos = structure.index('A')
             if (structure[-1] == 'A') or (structure[-2] == 'A' and phonemes[-1] in ['n','s']):
@@ -165,14 +166,14 @@ class Phonetizer():
         return
 
     def print_structure(self, n):
+        if n == -1:
+            n = len(self.text_structure) - 1
         for i in range(n):
-            if self.text_raw[i] == []:
-                continue
             try:
                 print(' '.join(self.text_phoneme[i]), self.text_syllables[i])
 
             except IndexError:
-                print(f'given index greater than number of lines in the text:\
+                print(f'given index greater than number of lines in the text:\n\
                 number of lines: {len(self.text_structure)} -- index: {n}')
 
         return
@@ -190,4 +191,4 @@ phonetizer2.text2structure()
 phonetizer3 = Phonetizer(vowels, consonants, char2phone)
 phonetizer3.read_txt('decima2.txt')
 phonetizer3.text2structure()
-phonetizer3.print_structure(10)
+phonetizer3.print_structure(-1)

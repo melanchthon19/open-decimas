@@ -18,7 +18,7 @@ mui rebueltita después [8]\
 ia ben mi abuelo xosé [8]\
 kon el kódigo en su mente [8]\
 i kién ubo más prudente [8]\
-komo mi otro abuelo fue [7]\  # monosílabo
+komo mi otro abuelo fue [7]  # monosílabo\
 tan sabios konosimientos [8]\
 no rekaieron en ixos [8]\
 kon un misterio prolixo [8]\

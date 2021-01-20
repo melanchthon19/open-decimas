@@ -11,14 +11,14 @@ Examples:
 **Violeta Parra - De tal palo, tal astilla**\
 de tal palo tal astiLa [8]\
 se dekiboka el refrán [8]\
-solo le kuadra a san xuan [7]  # fix monosílabo\
-pero no a esta mokosiLa [9]  # edge cases for sinalefa: pe-ro-**noaes**-ta-mo-ko-si-La [8]\
+solo le kuadra a san xuan [7]  *# fix monosílabo*\
+pero no a esta mokosiLa [9]  *# edge cases for sinalefa: pe-ro-**noaes**-ta-mo-ko-si-La [8]*\
 bien dorá fue la tortiLa [8]\
 mui rebueltita después [8]\
 ia ben mi abuelo xosé [8]\
 kon el kódigo en su mente [8]\
 i kién ubo más prudente [8]\
-komo mi otro abuelo fue [7]  # monosílabo\
+komo mi otro abuelo fue [7]  *# monosílabo*\
 tan sabios konosimientos [8]\
 no rekaieron en ixos [8]\
 kon un misterio prolixo [8]\

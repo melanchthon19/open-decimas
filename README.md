@@ -7,6 +7,6 @@ Are machines able to write decimas? Let's find out.
 Image from: https://www.patrimoniocultural.gob.cl/614/w3-article-5398.html?_noredirect=1
 
 TODO:
-- hiato
+- word-embeddings
 - further preprocessing for edge cases
 - non-spanish words

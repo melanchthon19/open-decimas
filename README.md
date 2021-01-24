@@ -27,7 +27,7 @@ en lo kual io no les miento [8]\
 tengo la prueba en la mano [8]\
 io les presento a mi ermano [8]\
 komo el más bonito exemplo [8]\
-si aora no tiene un templo [8]\
+si aora no tiene un templo [8]
 
 TODO:
 - monosílabos

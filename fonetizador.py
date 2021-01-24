@@ -130,7 +130,7 @@ class Phonetizer():
 
     def acentuacion(self, phonemes, structure):
         # add if monosílabo
-        
+
         if 'A' in structure:
             pos = structure.index('A')
             if (structure[-1] == 'A') or (structure[-2] == 'A' and phonemes[-1] in ['n','s']):
@@ -146,9 +146,19 @@ class Phonetizer():
             else:
                 return 'aguda'
 
+    def monosilabo(self, structure):
+        rough_count_syllables = ''.join(structure).split('C')
+        rough_count_syllables = [c for c in rough_count_syllables if c]
+        if len(rough_count_syllables) == 1:
+            return True
+
     def metric_rule(self, last_word):
         phonemes, structure = last_word
+        #print(last_word)
         accent = self.acentuacion(phonemes, structure)
+
+        if self.monosilabo(structure):
+            return +1
 
         if accent == 'aguda':
             return +1

@@ -45,6 +45,7 @@ class Scrap_Decimas():
         return
 
     def scrap_violeta(self):
+        # this documents requires further preprocessing
         file = '../decimas-violeta-parra.pdf'
         pdf_file = open(file, 'rb')
         read_pdf = PyPDF2.PdfFileReader(pdf_file)

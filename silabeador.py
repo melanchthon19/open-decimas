@@ -17,22 +17,47 @@ import phonetics
 
 class Silabeador():
     def __init__(self, verbose=False, **ph):
-        self.verbose = verbose
+        '''
+        Silabeador class takes a sentence as input
+        and gets its number of metric syllables.
+        along with other relevant information throughout the process.
+        '''
+        self.verbose = verbose  # to print out the result of each function.
+        # relevant phonetics information used to separate the sentence into metric syllables.
         self.vowels = ph['vowels']
         self.consonants = ph['consonants']
         self.alphabet = ph['alphabet']
         self.phonemes_dict = ph['phonemes_dict']
         self.char2phone = ph['char2phone']  # hierarchical rules to chage characters to phones
+        # variables used within the class
         self.text_raw = []
         self.text_phoneme = []
         self.text_structure = []
         self.text_syllables = []
 
-    def count_again(self):
-        self.text_raw = []
-        self.text_phoneme = []
-        self.text_structure = []
-        self.text_syllables = []
+    def count_syllables(self, sentence):
+        '''
+        function that takes a sentence and count the number of metric syllables
+        input: string
+        output: number of syllables (TODO: add string divided by each syllable)
+        '''
+        phonemes = self.word2phonemes(word)
+        structure = self.phonemes2structure(phonemes)
+        last_word = (phonemes[-1], structure[-1])
+        syllables = self.count(structure[:]) + self.metric_rule(last_word)
+
+        return syllables  # amount of syllables in the sentence
+
+    def count(self, structure):
+        # TODO: re-think in a more robust way
+
+        structure = ''.join([s for word_structure in structure for s in word_structure])
+        structure = re.sub(r'([FD]{3})', r'\1C\1', structure)  # adding extra consonant
+        vowels = re.split('C', structure)
+
+        number_syllables = len([v for v in vowels if v])
+
+        return number_syllables
 
     def word2phonemes(self, word):
         # findall retrieves a list of characters only
@@ -66,16 +91,8 @@ class Silabeador():
 
         return number_syllables
 
-    def syllables_per_sentence(self, sentence_structure):
-        sentence_structure = ''.join([s for word_structure in sentence_structure for s in word_structure])
-        sentence_structure = re.sub(r'([FD]{3})', r'\1C\1', sentence_structure)  # adding extra consonant
-        vowels = re.split('C', sentence_structure)
-
-        number_syllables = len([v for v in vowels if v])
-
-        return number_syllables
-
     def text2structure(self):
+        # not being used --> being segmented and refactored
         if self.text_raw == None:
             raise AttributeError('pass a txt file to read first')
 
@@ -106,8 +123,11 @@ class Silabeador():
         return
 
     def acentuacion(self, phonemes, structure):
-        # add if monosílabo
-
+        '''
+        checks if the word is aguda, grave or esdrujula.
+        input: word as a tuple of its phonemes and structure.
+        output: string ['aguda', 'grave', 'esdrujula']
+        '''
         if 'A' in structure:
             pos = structure.index('A')
             if (structure[-1] == 'A') or (structure[-2] == 'A' and phonemes[-1] in ['n','s']):
@@ -124,14 +144,28 @@ class Silabeador():
                 return 'aguda'
 
     def monosilabo(self, structure):
+        '''
+        checks if structure is a monosilabo.
+        input: structure of a word
+        output: boolean
+        '''
         rough_count_syllables = ''.join(structure).split('C')
         rough_count_syllables = [c for c in rough_count_syllables if c]
         if len(rough_count_syllables) == 1:
             return True
+        else:
+            return False
 
     def metric_rule(self, last_word):
+        '''
+        applies metric rule:
+        +1 if last word is aguda
+        +0 if last word is grave
+        -1 if last word is esdrujula
+        input: last word as a tuple of its phonemes and structure
+        output: int [+1, 0, -1]
+        '''
         phonemes, structure = last_word
-        #print(last_word)
         accent = self.acentuacion(phonemes, structure)
 
         if self.monosilabo(structure):
@@ -144,13 +178,6 @@ class Silabeador():
         else:  # accent == 'esdrujula':
             return -1
 
-    def read_txt(self, file):
-        with open(file, 'r') as f:
-            text = f.readlines()
-        # add further pre-processing to get rid of empty lines and non-alphabetic characters.
-        self.text_raw = [line.lower().strip().split() for line in text]
-
-        return
 
     def print_structure(self, n):
         if n == -1:
@@ -190,8 +217,9 @@ if __name__ == '__main__':
 
     # ph is a dictionary with information regarding vowels, alphabet, char2phone rules, etc.
     ph = phonetics.phonetics
+    text = preprocess.read_txt('decima2.txt'))
 
-    phonetizer3 = Silabeador(**ph)
-    phonetizer3.read_txt('decima2.txt')
-    phonetizer3.text2structure()
-    phonetizer3.print_structure(-1)
+    silabeador = Silabeador(**ph)
+    silabeador.count_syllables(text[0])
+    #silabeador.text2structure()
+    silabeador.print_structure(-1)

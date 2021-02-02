@@ -48,10 +48,17 @@ char2phone = {
 #   3) verso terminada en palabra esdrújula --> -1
 
 class Phonetizer():
-    def __init__(self, vowels, consonants, char2phone):
+    def __init__(self, vowels, consonants, char2phone, verbose=False):
+        self.verbose = verbose
         self.vowels = vowels
         self.consonants = consonants
         self.char2phone = char2phone  # hierarchical rules to chage characters to phones
+        self.text_raw = []
+        self.text_phoneme = []
+        self.text_structure = []
+        self.text_syllables = []
+
+    def count_again(self):
         self.text_raw = []
         self.text_phoneme = []
         self.text_structure = []
@@ -188,17 +195,37 @@ class Phonetizer():
 
         return
 
+    def check_eight_syllables(self, verso):
+        # TODO: refactor this code
+        sentence_phonemes = []
+        sentence_structure = []
+        for word in verso:
+            phonemes = self.word2phonemes(word)
+            sentence_phonemes.append(phonemes)
+            structure = self.phonemes2structure(phonemes)
+            sentence_structure.append(structure)
+        number_syllables = self.syllables_per_sentence(sentence_structure[:])  # passing a copy of the list
+        last_word = (sentence_phonemes[-1], sentence_structure[-1])
+        total_number = number_syllables + self.metric_rule(last_word)
+        print(total_number)
+        if total_number == 8:
+            return 'match'
+        elif total_number > 8:
+            return 'greater'
+        else:
+            return 'fewer'
 
-#phonetizer1 = Phonetizer(vowels, consonants, char2phone)
-#phonetizer1.read_txt('cuento1.txt')
-#phonetizer1.text2structure()
-#phonetizer1.print_structure(3)
+if __name__ == '__main__':
+    #phonetizer1 = Phonetizer(vowels, consonants, char2phone)
+    #phonetizer1.read_txt('cuento1.txt')
+    #phonetizer1.text2structure()
+    #phonetizer1.print_structure(3)
 
-phonetizer2 = Phonetizer(vowels, consonants, char2phone)
-phonetizer2.read_txt('decima1.txt')
-phonetizer2.text2structure()
+    phonetizer2 = Phonetizer(vowels, consonants, char2phone)
+    phonetizer2.read_txt('decima1.txt')
+    phonetizer2.text2structure()
 
-phonetizer3 = Phonetizer(vowels, consonants, char2phone)
-phonetizer3.read_txt('decima2.txt')
-phonetizer3.text2structure()
-phonetizer3.print_structure(-1)
+    phonetizer3 = Phonetizer(vowels, consonants, char2phone)
+    phonetizer3.read_txt('decima2.txt')
+    phonetizer3.text2structure()
+    phonetizer3.print_structure(-1)

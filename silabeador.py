@@ -4,40 +4,7 @@
 import pandas as pd
 import re
 import sys
-
-vowels_strong = {'a':'F', 'e':'F', 'o':'F',}
-vowels_weak = {'i':'D', 'u':'D', 'ü':'D'}
-vowels_accented = {'á':'A', 'é':'A', 'í':'A', 'ó':'A', 'ú':'A'}
-consonants = {'m':'C', 'n':'C', 'ñ':'C',
-              'p':'C', 't':'C', 'k':'C', 'b':'C', 'd':'C', 'g':'C',
-              'C':'C',
-              'f':'C', 's':'C', 'L':'C', 'x':'C',
-              'l':'C', 'r':'C', 'R':'C'}
-
-vowels = list(vowels_strong.keys()) + list(vowels_weak.keys()) + list(vowels_accented.keys())
-alphabet = vowels + list(consonants.keys())
-phonemes_dict = {**vowels_strong, **vowels_weak, **vowels_accented, **consonants}
-
-char2phone = {
-       1:{
-       'ci': 'si',
-       'cí': 'sí',
-       'ce': 'se',
-       'cé': 'sé',
-       'ch': 'C',
-       'qu': 'k',
-       'gui': 'gi',
-       'gue': 'ge'},
-       2:{
-       'c': 'k',
-       'll': 'L',
-       'rr': 'R',
-       'j': 'x',
-       'h': '',
-       'z': 's',
-       'v': 'b',
-       'y': 'i'}
-       }
+import phonetics
 
 # sinéresis: dos vocales que no forman diptongo, forman diptongo. (e.g. gor-je-ar --> gor-jear)
 # diéresis: se separan dos vocales que forman diptongo. (e.g. sua-ve --> su-a-ve)
@@ -47,12 +14,15 @@ char2phone = {
 #   2) verso terminada en palabra grave --> +0
 #   3) verso terminada en palabra esdrújula --> -1
 
-class Phonetizer():
-    def __init__(self, vowels, consonants, char2phone, verbose=False):
+
+class Silabeador():
+    def __init__(self, verbose=False, **ph):
         self.verbose = verbose
-        self.vowels = vowels
-        self.consonants = consonants
-        self.char2phone = char2phone  # hierarchical rules to chage characters to phones
+        self.vowels = ph['vowels']
+        self.consonants = ph['consonants']
+        self.alphabet = ph['alphabet']
+        self.phonemes_dict = ph['phonemes_dict']
+        self.char2phone = ph['char2phone']  # hierarchical rules to chage characters to phones
         self.text_raw = []
         self.text_phoneme = []
         self.text_structure = []
@@ -77,7 +47,7 @@ class Phonetizer():
         return phonemes
 
     def phonemes2structure(self, phonemes):
-        structure = [phonemes_dict[phone] for phone in phonemes if phone in alphabet]
+        structure = [self.phonemes_dict[phone] for phone in phonemes if phone in self.alphabet]
 
         return structure
 
@@ -148,7 +118,7 @@ class Phonetizer():
                 return 'grave'
 
         else:
-            if phonemes[-1] in (vowels + ['n','s']):
+            if phonemes[-1] in (self.vowels + ['n','s']):
                 return 'grave'
             else:
                 return 'aguda'
@@ -215,17 +185,13 @@ class Phonetizer():
         else:
             return 'fewer'
 
+
 if __name__ == '__main__':
-    #phonetizer1 = Phonetizer(vowels, consonants, char2phone)
-    #phonetizer1.read_txt('cuento1.txt')
-    #phonetizer1.text2structure()
-    #phonetizer1.print_structure(3)
 
-    phonetizer2 = Phonetizer(vowels, consonants, char2phone)
-    phonetizer2.read_txt('decima1.txt')
-    phonetizer2.text2structure()
+    # ph is a dictionary with information regarding vowels, alphabet, char2phone rules, etc.
+    ph = phonetics.phonetics
 
-    phonetizer3 = Phonetizer(vowels, consonants, char2phone)
+    phonetizer3 = Silabeador(**ph)
     phonetizer3.read_txt('decima2.txt')
     phonetizer3.text2structure()
     phonetizer3.print_structure(-1)

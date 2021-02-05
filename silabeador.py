@@ -38,6 +38,12 @@ class Silabeador():
         self.phonemes = []
         self.structure = []
         self.syllables = []
+        self.last_word = {}
+
+    def count_syllables_text(self, text):
+        syllables_text = []
+        for line in text:
+            syllables_text.append(self.count_syllables(line))
 
     def count_syllables(self, sentence):
         '''
@@ -48,14 +54,17 @@ class Silabeador():
         self.sentence = sentence
         self.phonemes = [self.word2phonemes(word) for word in self.sentence]
         self.structure = self.phonemes2structure(self.phonemes)
-        last_word = (self.phonemes[-1], self.structure[-1])
-        self.syllables = self.count(self.structure[:]) + self.metric_rule(last_word)
+        self.get_last_word()
+        self.syllables = self.count(self.structure[:]) + self.metric_rule()
 
         if self.verbose:
             print('sentence', self.sentence)
             print('phonemes', self.phonemes)
             print('structure', self.structure)
             print('number of metric syllables', self.syllables)
+            print('last word:', self.last_word['word'])
+            print('last word accent:', self.last_word['accent'])
+            print('is last word monosilabo:', self.last_word['monosilabo'])
 
         return self.syllables  # amount of syllables in the sentence
 
@@ -102,7 +111,7 @@ class Silabeador():
 
         return number_syllables
 
-    def metric_rule(self, last_word):
+    def metric_rule(self):
         '''
         applies metric rule:
         +1 if last word is aguda
@@ -111,19 +120,16 @@ class Silabeador():
         input: last word as a tuple of its phonemes and structure
         output: int [+1, 0, -1]
         '''
-        phonemes, structure = last_word
-        monosilabo = self.is_monosilabo(structure)
-        accent = self.acentuacion(phonemes, structure, monosilabo)
+        self.last_word['monosilabo'] = self.is_monosilabo(self.last_word['structure'])
+        self.last_word['accent'] = self.acentuacion(self.last_word['phonemes'],\
+                                                    self.last_word['structure'],\
+                                                    self.last_word['monosilabo'])
 
-        if self.verbose:
-            print('last word accent:', accent)
-            print('is last word monosilabo:', monosilabo)
-
-        if monosilabo:
+        if self.last_word['monosilabo']:
             return +1
-        if accent == 'aguda':
+        if self.last_word['accent'] == 'aguda':
             return +1
-        elif accent == 'grave':
+        elif self.last_word['accent'] == 'grave':
             return 0
         else:  # accent == 'esdrujula':
             return -1
@@ -157,13 +163,19 @@ class Silabeador():
         input: structure of a word
         output: boolean
         '''
-        number_of_vowels = len([vowel for vowel in structure if vowel in ['D','F','A']])
-
+        print(structure)
+        number_of_vowels = len([vowel for vowel in ''.join(structure).split('C') if vowel])
+        print(number_of_vowels)
         if number_of_vowels == 1:
             return True
         else:
             return False
 
+    def get_last_word(self):
+        print(self.sentence[-1])
+        self.last_word['word'] = self.sentence[-1]
+        self.last_word['phonemes'] = self.phonemes[-1]
+        self.last_word['structure'] = self.structure[-1]
 
 if __name__ == '__main__':
 
@@ -173,4 +185,4 @@ if __name__ == '__main__':
 
     silabeador = Silabeador(**ph)
     silabeador.count_syllables(text[0])
-    #silabeador.text2structure()
+    silabeador.count_syllables_text(text)

@@ -25,31 +25,36 @@ class Silabeador():
         self.phonemes_dict = ph['phonemes_dict']
         self.char2phone = ph['char2phone']  # hierarchical rules to chage characters to phones
 
-        # variables used within the class
+        # variables used within each count_syllables call
         self.sentence = []
         self.phonemes = []
         self.structure = []
         self.syllables = []
-        self.last_word = {}
+        self.last_word = {'word': None,\
+                          'phonemes': None,\
+                          'structure': None,\
+                          'monosilabo': None,\
+                          'accent': None,\
+                          'rithm': None}
 
     def count_syllables_text(self, text):
         syllables_text = []
         for line in text:
-            syllables_text.append(self.count_syllables(line))
+            syllables_text.append(self.count_syllables_sentence(line))
 
-    def count_syllables(self, sentence):
+    def count_syllables_sentence(self, sentence):
         '''
-        function that takes a sentence and count the number of metric syllables
+        function that takes a sentence and counts the number of metric syllables
         input: string
         output: number of syllables (TODO: add string divided by each syllable)
         '''
         self.sentence = sentence
         self.phonemes = [self.word2phonemes(word) for word in self.sentence]
-        self.structure = self.phonemes2structure(self.phonemes)
-        self.get_last_word()
-        self.syllables = self.divide_syllables(self.structure[:]) + self.metric_rule()
+        self.structure = [self.phonemes2structure(word) for word in self.phonemes]
+        self.get_last_word()  # metric rules are considered when counting syllables in a sentence
+        self.syllables = self.count_syllables(self.structure[:]) + self.metric_rule()
 
-        if self.verbose and self.syllables != 8:
+        if self.verbose:# and self.syllables != 8:  # add second condition for debugging purposes
             print('sentence', self.sentence)
             print('phonemes', self.phonemes)
             print('structure', self.structure)
@@ -61,8 +66,9 @@ class Silabeador():
         return self.syllables  # amount of syllables in the sentence
 
     def sentence2phonemes(self, sentence):
+        # not being used. replaced by word2phonemes
         # findall retrieves a list of characters only
-        phonemes = ''.join(re.findall('[^\W]*', self.sentence))
+        phonemes = ''.join(re.findall('[^\W]*', self.sentence))  # this step should be done in preprocessing
 
         for rule in self.char2phone.keys():  # certain rules must be applied first
             for char in self.char2phone[rule]:
@@ -74,8 +80,7 @@ class Silabeador():
 
     def word2phonemes(self, word):
         # findall retrieves a list of characters only
-
-        phonemes = ''.join(re.findall('[^\W]*', word))
+        phonemes = ''.join(re.findall('[^\W]*', word))  # this step should be done in preprocessing
 
         for rule in self.char2phone.keys():  # certain rules must be applied first
             for char in self.char2phone[rule]:
@@ -86,24 +91,24 @@ class Silabeador():
         return phonemes
 
     def phonemes2structure(self, phonemes):
-        structure = []
-        for word in phonemes:
-            structure.append([self.phonemes_dict[phone] for phone in word if phone in self.alphabet])
+        structure = [self.phonemes_dict[phone] for phone in phonemes if phone in self.alphabet]
 
         return structure
 
-    def divide_syllables(self, sentence_structure):
+    def count_syllables(self, sentence_structure):
         # TODO:
         # apply: 1) sinalefa, 2) diéresis, 3) sinéresis
-        #print(sentence_structure)
         # sinéresis: dos vocales que no forman diptongo, forman diptongo. (e.g. gor-je-ar --> gor-jear)
         # diéresis: se separan dos vocales que forman diptongo. (e.g. sua-ve --> su-a-ve)
         # sinalefa: dos vocales de palabras contiguas se diptonguean. (e.g. cie-lo-y-mar --> cie-loy-mar)
+        #for word_structure in sentence_structure:
+        #number_syllables = re.findall(r'[(FD)(DF)(F)A]', structure)
+
+        #self.sinalefa(sentence_structure)
         structure = ''.join([s for word_structure in sentence_structure for s in word_structure])
         structure = re.sub(r'([FD]{3})', r'\1C\1', structure)  # adding extra consonant
-        #print(structure)
-        vowels = re.split('C', structure)
 
+        vowels = re.split('C', structure)
         number_syllables = len([v for v in vowels if v])
 
         return number_syllables
@@ -158,22 +163,45 @@ class Silabeador():
             else:
                 return 'aguda'
 
+    def count_word_syllables(self, structure):
+        return len([vowel for vowel in ''.join(structure).split('C') if vowel])
+
     def is_monosilabo(self, structure):
         '''
         checks if structure is a monosilabo.
         input: structure of a word
         output: boolean
         '''
-        number_of_vowels = len([vowel for vowel in ''.join(structure).split('C') if vowel])
-        if number_of_vowels == 1:
+        if self.count_word_syllables(structure) == 1:
             return True
         else:
             return False
+
+    def count_syllables_word(self, word):
+        self.word = word
+        self.phonemes = self.word2phonemes(self.word)
+        self.structure = self.phonemes2structure(self.phonemes)
+        structure = ''.join([s for s in self.structure])
+        structure = re.sub(r'([FD]{3})', r'\1C\1', structure)  # adding extra consonant
+
+        vowels = re.split('C', structure)
+        self_syllables = len([v for v in vowels if v])
+        #self.syllables = self.count_word_syllables(self.structure[:])
+
+        if self.verbose:# and self.syllables != 8:  # add second condition for debugging purposes
+            print('word', self.word)
+            print('phonemes', self.phonemes)
+            print('structure', self.structure)
+            print('number of metric syllables', self.syllables)
+            print()
+
+        return self.syllables  # amount of syllables in the word
 
     def get_last_word(self):
         self.last_word['word'] = self.sentence[-1]
         self.last_word['phonemes'] = self.phonemes[-1]
         self.last_word['structure'] = self.structure[-1]
+
 
 if __name__ == '__main__':
 
@@ -182,5 +210,9 @@ if __name__ == '__main__':
     text = preprocess.read_txt('data/decima2.txt')
 
     silabeador = Silabeador(**ph)
-    silabeador.count_syllables(text[0])
-    silabeador.count_syllables_text(text)
+    #silabeador.count_syllables_sentence(text[0])
+    #silabeador.count_syllables_text(text)
+
+    words = ['tendrá', 'tarde', 'temprano', 'antes', 'fue', 'fuimos', 'considerablemente', 'año', 'mañío', 'injobulisomante', 'atardecía', 'compañía', 'aéreo']
+    for word in words:
+        silabeador.count_syllables_word(word)

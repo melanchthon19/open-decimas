@@ -7,14 +7,6 @@ import sys
 import phonetics
 import preprocess
 
-# sinéresis: dos vocales que no forman diptongo, forman diptongo. (e.g. gor-je-ar --> gor-jear)
-# diéresis: se separan dos vocales que forman diptongo. (e.g. sua-ve --> su-a-ve)
-# sinalefa: dos vocales de palabras contiguas se diptonguean. (e.g. cie-lo-y-mar --> cie-loy-mar)
-# reglas de acentuación:
-#   1) verso terminada en palabra aguda --> +1
-#   2) verso terminada en palabra grave --> +0
-#   3) verso terminada en palabra esdrújula --> -1
-
 
 class Silabeador():
     def __init__(self, verbose=True, **ph):
@@ -55,9 +47,9 @@ class Silabeador():
         self.phonemes = [self.word2phonemes(word) for word in self.sentence]
         self.structure = self.phonemes2structure(self.phonemes)
         self.get_last_word()
-        self.syllables = self.count(self.structure[:]) + self.metric_rule()
+        self.syllables = self.divide_syllables(self.structure[:]) + self.metric_rule()
 
-        if self.verbose:
+        if self.verbose and self.syllables != 8:
             print('sentence', self.sentence)
             print('phonemes', self.phonemes)
             print('structure', self.structure)
@@ -100,11 +92,16 @@ class Silabeador():
 
         return structure
 
-    def count(self, structure):
-        # TODO: re-think in a more robust way
-
-        structure = ''.join([s for word_structure in structure for s in word_structure])
+    def divide_syllables(self, sentence_structure):
+        # TODO:
+        # apply: 1) sinalefa, 2) diéresis, 3) sinéresis
+        #print(sentence_structure)
+        # sinéresis: dos vocales que no forman diptongo, forman diptongo. (e.g. gor-je-ar --> gor-jear)
+        # diéresis: se separan dos vocales que forman diptongo. (e.g. sua-ve --> su-a-ve)
+        # sinalefa: dos vocales de palabras contiguas se diptonguean. (e.g. cie-lo-y-mar --> cie-loy-mar)
+        structure = ''.join([s for word_structure in sentence_structure for s in word_structure])
         structure = re.sub(r'([FD]{3})', r'\1C\1', structure)  # adding extra consonant
+        #print(structure)
         vowels = re.split('C', structure)
 
         number_syllables = len([v for v in vowels if v])
@@ -117,19 +114,23 @@ class Silabeador():
         +1 if last word is aguda
         +0 if last word is grave
         -1 if last word is esdrujula
-        input: last word as a tuple of its phonemes and structure
+        input: self (uses information from dictionary last_word)
         output: int [+1, 0, -1]
         '''
-        self.last_word['monosilabo'] = self.is_monosilabo(self.last_word['structure'])
-        self.last_word['accent'] = self.acentuacion(self.last_word['phonemes'],\
-                                                    self.last_word['structure'],\
-                                                    self.last_word['monosilabo'])
+        structure = self.last_word['structure']
+        phonemes = self.last_word['phonemes']
 
-        if self.last_word['monosilabo']:
+        monosilabo = self.is_monosilabo(structure)
+        accent = self.acentuacion(phonemes, structure, monosilabo)
+
+        self.last_word['monosilabo'] = monosilabo
+        self.last_word['accent'] = accent
+
+        if monosilabo:
             return +1
-        if self.last_word['accent'] == 'aguda':
+        if accent == 'aguda':
             return +1
-        elif self.last_word['accent'] == 'grave':
+        elif accent == 'grave':
             return 0
         else:  # accent == 'esdrujula':
             return -1
@@ -163,16 +164,13 @@ class Silabeador():
         input: structure of a word
         output: boolean
         '''
-        print(structure)
         number_of_vowels = len([vowel for vowel in ''.join(structure).split('C') if vowel])
-        print(number_of_vowels)
         if number_of_vowels == 1:
             return True
         else:
             return False
 
     def get_last_word(self):
-        print(self.sentence[-1])
         self.last_word['word'] = self.sentence[-1]
         self.last_word['phonemes'] = self.phonemes[-1]
         self.last_word['structure'] = self.structure[-1]

@@ -3,13 +3,14 @@
 
 import pandas as pd
 import re
+#import regex
 import sys
 import phonetics
 import preprocess
 
 
 class Silabeador():
-    def __init__(self, verbose=True, **ph):
+    def __init__(self, verbose=False, **ph):
         '''
         Silabeador class takes a sentence as input
         and gets its number of metric syllables.
@@ -24,6 +25,8 @@ class Silabeador():
         self.alphabet = ph['alphabet']
         self.phonemes_dict = ph['phonemes_dict']
         self.char2phone = ph['char2phone']  # hierarchical rules to chage characters to phones
+        self.punctuation = ph['punctuation']
+        self.double_consonants = ph['double_consonants']
 
         # variables used within each count_syllables call
         self.sentence = []
@@ -48,11 +51,16 @@ class Silabeador():
         input: string
         output: number of syllables (TODO: add string divided by each syllable)
         '''
-        self.sentence = sentence
+        self.sentence = sentence.split()
+        #print(self.sentence)
         self.phonemes = [self.word2phonemes(word) for word in self.sentence]
+        print(self.phonemes)
         self.structure = [self.phonemes2structure(word) for word in self.phonemes]
-        self.get_last_word()  # metric rules are considered when counting syllables in a sentence
-        self.syllables = self.count_syllables(self.structure[:]) + self.metric_rule()
+        #print(self.structure)
+        #self.get_last_word()  # metric rules are considered when counting syllables in a sentence
+        #self.syllables = self.count_syllables(self.structure[:]) + self.metric_rule()
+        self.syllables = [self.divide_word_syllables(word) for word in self.structure]
+        print(self.syllables)
 
         if self.verbose:# and self.syllables != 8:  # add second condition for debugging purposes
             print('sentence', self.sentence)
@@ -80,20 +88,54 @@ class Silabeador():
 
     def word2phonemes(self, word):
         # findall retrieves a list of characters only
-        phonemes = ''.join(re.findall('[^\W]*', word))  # this step should be done in preprocessing
-
+        phonemes = ''.join(re.findall('[^\W]*', word))  # TODO: deal with punctuation in the middle of sentence
         for rule in self.char2phone.keys():  # certain rules must be applied first
             for char in self.char2phone[rule]:
                 if char in phonemes:
                     # modifying the word on the fly
                     phonemes = re.sub(char, self.char2phone[rule][char], phonemes)
-
         return phonemes
 
     def phonemes2structure(self, phonemes):
-        structure = [self.phonemes_dict[phone] for phone in phonemes if phone in self.alphabet]
-
+        phonemes_reduced = self.reduce_double_syllables(phonemes)
+        structure = [self.phonemes_dict[phone] if phone in self.alphabet else phone for phone in phonemes_reduced]
         return structure
+
+    def divide_word_syllables(self, word):
+        sequence = ''.join(word)
+        pattern = re.compile(r"""(CDDC(?![FAD]))?
+                                 (CDAC(?![FAD]))?
+                                 (CDD)?
+                                 (CDFC(?![AFD]))?
+                                 (CDF)?
+                                 (DFC)?
+                                 (CCF)?
+                                 (CFT)?
+                                 (CFC(?![AFD]))?
+                                 (CF)?
+                                 (DF)?
+                                 (TF)?
+                                 (TA)?
+                                 (FC(?![FAD]))?
+                                 (CD(?![AFD]))?
+                                 (DC(?=[CT]))?
+                                 (CA)?
+                                 (F(?=C[FAD])?)?
+                                 (A)?
+                                 (D)?""", re.VERBOSE)
+        match = re.findall(pattern, sequence)
+        syllables = '-'.join([syllable for group in match for syllable in group if syllable])
+
+        return syllables
+
+    def reduce_double_syllables(self, word):
+        word = [char for char in word]
+        for char in range(len(word)):
+            if ''.join(word[char:char+2]) in self.double_consonants:
+                word[char] = 'T'
+                word.pop(char+1)
+
+        return ''.join(word)
 
     def count_syllables(self, sentence_structure):
         # TODO:
@@ -163,8 +205,8 @@ class Silabeador():
             else:
                 return 'aguda'
 
-    def count_word_syllables(self, structure):
-        return len([vowel for vowel in ''.join(structure).split('C') if vowel])
+    #def count_word_syllables(self, structure):
+    #    return len([vowel for vowel in ''.join(structure).split('C') if vowel])
 
     def is_monosilabo(self, structure):
         '''
@@ -172,11 +214,11 @@ class Silabeador():
         input: structure of a word
         output: boolean
         '''
-        if self.count_word_syllables(structure) == 1:
-            return True
-        else:
-            return False
-
+        #if self.count_word_syllables(structure) == 1:
+        #    return True
+        #else:
+        #    return False
+        pass
     def count_syllables_word(self, word):
         self.word = word
         self.phonemes = self.word2phonemes(self.word)
@@ -211,8 +253,25 @@ if __name__ == '__main__':
 
     silabeador = Silabeador(**ph)
     #silabeador.count_syllables_sentence(text[0])
-    #silabeador.count_syllables_text(text)
+    silabeador.count_syllables_text(text)
 
-    words = ['tendrá', 'tarde', 'temprano', 'antes', 'fue', 'fuimos', 'considerablemente', 'año', 'mañío', 'injobulisomante', 'atardecía', 'compañía', 'aéreo']
-    for word in words:
-        silabeador.count_syllables_word(word)
+    #words = ['tendrá', 'tarde', 'temprano', 'antes', 'fue', 'fuimos', 'considerablemente', 'año', 'mañío', 'injobulisomante', 'atardecía', 'compañía', 'aéreo']
+    #for word in words:
+    #    silabeador.count_syllables_word(word)
+
+
+    syllabe_patterns = [re.compile(r'(CDDC(?![FAD]))?'),
+                       re.compile(r'(CDD)?'),
+                       re.compile(r'(CDF)?'),
+                       re.compile(r'(DFC)?'),
+                       re.compile(r'(CCF)?'),
+                       re.compile(r'(CFT)?'),
+                       re.compile(r'(CFC(?=[CT\W$]))?'),
+                       re.compile(r'(CF)?'),
+                       re.compile(r'(DF)?'),
+                       re.compile(r'(TF)?'),
+                       re.compile(r'(FC(?=C))?'),
+                       re.compile(r'(CD)?'),
+                       re.compile(r'(CA)?'),
+                       re.compile(r'(F)?'),
+                           re.compile(r'(A)?')]

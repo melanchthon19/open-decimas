@@ -31,6 +31,8 @@ char2phone = {
        'v': 'b',
        'y': 'i'}
        }
+punctuation = ['.', ',', ';']
+double_consonants = ['tr', 'dr', 'ns']
 
 vowels = list(vowels_strong.keys()) + list(vowels_weak.keys()) + list(vowels_accented.keys())
 alphabet = vowels + list(consonants.keys())
@@ -44,4 +46,6 @@ phonetics = {'alphabet': alphabet,
              'consonants': consonants,
              'char2phone': char2phone,
              'phonemes_dict': phonemes_dict,
+             'punctuation': punctuation,
+             'double_consonants': double_consonants
              }

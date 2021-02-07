@@ -59,10 +59,10 @@ class Silabeador():
         #print(self.structure)
         #self.get_last_word()  # metric rules are considered when counting syllables in a sentence
         #self.syllables = self.count_syllables(self.structure[:]) + self.metric_rule()
-        self.syllables = [self.divide_word_syllables(word) for word in self.structure]
-        #print(self.syllables)
-        self.sentence_divided = [self.rewrite_word(structure, word) for structure, word in zip(self.syllables, self.phonemes)]
-
+        self.structure_syllables = [self.divide_structure_syllables(word) for word in self.structure]
+        print(self.structure_syllables)
+        self.word_syllables = [self.add_separator(structure, word) for structure, word in zip(self.structure_syllables, self.phonemes)]
+        print(self.word_syllables)
         if self.verbose:# and self.syllables != 8:  # add second condition for debugging purposes
             print('sentence', self.sentence)
             print('phonemes', self.phonemes)
@@ -89,7 +89,7 @@ class Silabeador():
         structure = [self.phonemes_dict[phone] if phone in self.alphabet else phone for phone in phonemes_reduced]
         return structure
 
-    def divide_word_syllables(self, word):
+    def divide_structure_syllables(self, word):
         sequence = ''.join(word)
         pattern = re.compile(r"""(CDDC(?![FAD]))?
                                  (CDAC(?![FAD]))?
@@ -117,9 +117,9 @@ class Silabeador():
                                  (A)?
                                  (D)?""", re.VERBOSE)
         match = re.findall(pattern, sequence)
-        syllables = '-'.join([syllable for group in match for syllable in group if syllable])
+        structure_syllables = '-'.join([syllable for group in match for syllable in group if syllable])
 
-        return syllables
+        return structure_syllables
 
     def reduce_double_syllables(self, word):
         word = [char for char in word]
@@ -130,7 +130,7 @@ class Silabeador():
 
         return ''.join(word)
 
-    def rewrite_word(self, structure, word):
+    def add_separator(self, structure, word):
         word_segmented = list(word)
         char = 0
         forward = 0

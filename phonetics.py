@@ -31,7 +31,7 @@ char2phone = {
        'v': 'b',
        'y': 'i'}
        }
-punctuation = ['.', ',', ';']
+punctuation = ['.', ',', ';', '?']
 double_consonants = ['tr', 'dr', 'ns', 'pr', 'fr']
 
 vowels = list(vowels_strong.keys()) + list(vowels_weak.keys()) + list(vowels_accented.keys())

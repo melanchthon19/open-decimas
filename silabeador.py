@@ -54,13 +54,14 @@ class Silabeador():
         self.sentence = sentence.split()
         #print(self.sentence)
         self.phonemes = [self.word2phonemes(word) for word in self.sentence]
-        print(self.phonemes)
+        #print(self.phonemes)
         self.structure = [self.phonemes2structure(word) for word in self.phonemes]
         #print(self.structure)
         #self.get_last_word()  # metric rules are considered when counting syllables in a sentence
         #self.syllables = self.count_syllables(self.structure[:]) + self.metric_rule()
         self.syllables = [self.divide_word_syllables(word) for word in self.structure]
-        print(self.syllables)
+        #print(self.syllables)
+        self.sentence_divided = [self.rewrite_word(structure, word) for structure, word in zip(self.syllables, self.phonemes)]
 
         if self.verbose:# and self.syllables != 8:  # add second condition for debugging purposes
             print('sentence', self.sentence)
@@ -72,19 +73,6 @@ class Silabeador():
             print('is last word monosilabo:', self.last_word['monosilabo'])
 
         return self.syllables  # amount of syllables in the sentence
-
-    def sentence2phonemes(self, sentence):
-        # not being used. replaced by word2phonemes
-        # findall retrieves a list of characters only
-        phonemes = ''.join(re.findall('[^\W]*', self.sentence))  # this step should be done in preprocessing
-
-        for rule in self.char2phone.keys():  # certain rules must be applied first
-            for char in self.char2phone[rule]:
-                if char in phonemes:
-                    # modifying the word on the fly
-                    phonemes = re.sub(char, self.char2phone[rule][char], phonemes)
-
-        return phonemes
 
     def word2phonemes(self, word):
         # findall retrieves a list of characters only
@@ -108,13 +96,18 @@ class Silabeador():
                                  (CDD)?
                                  (CDFC(?![AFD]))?
                                  (CDF)?
+                                 (CDC(?![AFD]))?
                                  (DFC)?
                                  (CCF)?
-                                 (CFT)?
+                                 (TFC(?![AFD]))?
+                                 (CFT(?![AFD]))?
                                  (CFC(?![AFD]))?
+                                 (TDF)?
                                  (CF)?
                                  (DF)?
                                  (TF)?
+                                 (TD)?
+                                 (TAC)?
                                  (TA)?
                                  (FC(?![FAD]))?
                                  (CD(?![AFD]))?
@@ -137,23 +130,19 @@ class Silabeador():
 
         return ''.join(word)
 
-    def count_syllables(self, sentence_structure):
-        # TODO:
-        # apply: 1) sinalefa, 2) diéresis, 3) sinéresis
-        # sinéresis: dos vocales que no forman diptongo, forman diptongo. (e.g. gor-je-ar --> gor-jear)
-        # diéresis: se separan dos vocales que forman diptongo. (e.g. sua-ve --> su-a-ve)
-        # sinalefa: dos vocales de palabras contiguas se diptonguean. (e.g. cie-lo-y-mar --> cie-loy-mar)
-        #for word_structure in sentence_structure:
-        #number_syllables = re.findall(r'[(FD)(DF)(F)A]', structure)
+    def rewrite_word(self, structure, word):
+        word_segmented = list(word)
+        char = 0
+        forward = 0
 
-        #self.sinalefa(sentence_structure)
-        structure = ''.join([s for word_structure in sentence_structure for s in word_structure])
-        structure = re.sub(r'([FD]{3})', r'\1C\1', structure)  # adding extra consonant
+        while char < len(word_segmented) - 1:
+            if structure[char] == '-':
+                word_segmented.insert(char + forward, '-')
+            elif structure[char] == 'T':
+                forward += 1  # moving one forward because T is mapped to two characters
+            char += 1
+        return ''.join(word_segmented)
 
-        vowels = re.split('C', structure)
-        number_syllables = len([v for v in vowels if v])
-
-        return number_syllables
 
     def metric_rule(self):
         '''
@@ -259,19 +248,34 @@ if __name__ == '__main__':
     #for word in words:
     #    silabeador.count_syllables_word(word)
 
+    def count_syllables(self, sentence_structure):
+        # TODO:
+        # apply: 1) sinalefa, 2) diéresis, 3) sinéresis
+        # sinéresis: dos vocales que no forman diptongo, forman diptongo. (e.g. gor-je-ar --> gor-jear)
+        # diéresis: se separan dos vocales que forman diptongo. (e.g. sua-ve --> su-a-ve)
+        # sinalefa: dos vocales de palabras contiguas se diptonguean. (e.g. cie-lo-y-mar --> cie-loy-mar)
+        #for word_structure in sentence_structure:
+        #number_syllables = re.findall(r'[(FD)(DF)(F)A]', structure)
 
-    syllabe_patterns = [re.compile(r'(CDDC(?![FAD]))?'),
-                       re.compile(r'(CDD)?'),
-                       re.compile(r'(CDF)?'),
-                       re.compile(r'(DFC)?'),
-                       re.compile(r'(CCF)?'),
-                       re.compile(r'(CFT)?'),
-                       re.compile(r'(CFC(?=[CT\W$]))?'),
-                       re.compile(r'(CF)?'),
-                       re.compile(r'(DF)?'),
-                       re.compile(r'(TF)?'),
-                       re.compile(r'(FC(?=C))?'),
-                       re.compile(r'(CD)?'),
-                       re.compile(r'(CA)?'),
-                       re.compile(r'(F)?'),
-                           re.compile(r'(A)?')]
+        #self.sinalefa(sentence_structure)
+        structure = ''.join([s for word_structure in sentence_structure for s in word_structure])
+        structure = re.sub(r'([FD]{3})', r'\1C\1', structure)  # adding extra consonant
+
+        vowels = re.split('C', structure)
+        number_syllables = len([v for v in vowels if v])
+
+        return number_syllables
+
+
+    def sentence2phonemes(self, sentence):
+        # not being used. replaced by word2phonemes
+        # findall retrieves a list of characters only
+        phonemes = ''.join(re.findall('[^\W]*', self.sentence))  # this step should be done in preprocessing
+
+        for rule in self.char2phone.keys():  # certain rules must be applied first
+            for char in self.char2phone[rule]:
+                if char in phonemes:
+                    # modifying the word on the fly
+                    phonemes = re.sub(char, self.char2phone[rule][char], phonemes)
+
+        return phonemes

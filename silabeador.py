@@ -15,7 +15,7 @@ import preprocess
 # sinalefa: dos vocales de palabras contiguas se diptonguean. (e.g. cie-lo-y-mar --> cie-loy-mar)
 
 class Silabeador():
-    def __init__(self, verbose=True, **ph):
+    def __init__(self, verbose=1, **ph):
         '''
         Silabeador class takes a sentence as input
         and gets its number of metric syllables.
@@ -75,7 +75,10 @@ class Silabeador():
 
         self.number_syllables = self.count(self.word_syllables, self.metric_rule(self.last_word))
 
-        if self.verbose:# and self.number_syllables != 8:  # add second condition for debugging purposes
+        if self.verbose == 1:
+            print(sentence, self.word_syllables, self.number_syllables)
+
+        elif self.verbose == 2:# and self.number_syllables != 8:  # add second condition for debugging purposes
             print('sentence', self.sentence)
             print('phonemes', self.phonemes)
             print('structure', self.structure)
@@ -285,16 +288,6 @@ if __name__ == '__main__':
     silabeador.sinalefa = True  # counting using sinalefa
     silabeador.count_syllables_sentence(text[1])
     silabeador.count_syllables_text(text)
-
-    def e(self):
-        for word in range(len(self.word_syllables)):
-            print(self.word_syllables[word], type(self.word_syllables[word]))
-            indexes = re.finditer(r'-', self.word_syllables[word])
-            print(indexes)
-            for i in indexes:
-                start, end = i.span()
-                if re.match(r'[ADF]', self.word_syllables[word][start-1]) and re.match(r'[ADF]', self.word_syllables[word][end]):
-                    self.word_syllables.pop(start)
 
     #def merge_words(self, sentence):
     #    sentence_merged = re.sub(r' ', '', sentence)  # removing white spaces

@@ -77,8 +77,7 @@ class Silabeador():
         self.last_word = self.get_last_word()
 
         if self.sinalefa:  # applying sinalefa (i.e. 'vuel-ta-y-me-dia' --> 'vuel-tay-me-dia')
-            print(self.word_syllables)
-            self.word_syllables = self.apply_sinalefa3()
+            self.word_syllables = self.apply_sinalefa()
 
         self.number_syllables = self.count(self.word_syllables, self.metric_rule(self.last_word))
 
@@ -101,142 +100,37 @@ class Silabeador():
 
         return self.number_syllables  # amount of metric syllables in the sentence
 
-    def apply_sinalefa3(self):
-        sinalefa_at_index = []
-        for index in range(len(self.word_syllables) - 1):
-            if self.are_vowels(self.word_syllables[index][-1], self.word_syllables[index+1][0]):
-                sinalefa_at_index.append((index, index+1))
-        print(sinalefa_at_index)
-
-        sinalefa_at_index = self.group_sinalefas(sinalefa_at_index)
-
-        merged_syllables = self.merge_syllables2(sinalefa_at_index)
-
-        quit()
-
-    def merge_syllables2(self, indexes):
-        merged_syllables = []
+    def apply_sinalefa(self):
+        """
+        function that applies sinalefa over word_syllables.
+        it checks if two contiguous syllables have a vowel and it merges them
+        in the same syllable.
+        """
+        syllables_sinalefa = []
         index = 0
-        while index in range(len(self.word_syllables)):
+        while index < len(self.word_syllables):
             try:
-                if index == indexes[0][0]:
-                    merged = ''.join(self.word_syllables[index:indexes[0][1]+1])
-                    merged_syllables.append(merged)
-                    index = indexes.pop(0)[1]
+                # checking if there is sinalefa
+                if self.are_vowels(syllables_sinalefa[-1][-1], self.word_syllables[index][0]):
+                    merged_syllables = ''.join([syllables_sinalefa[-1], self.word_syllables[index]])
+                    # replacing the last syllable with the merged syllable
+                    syllables_sinalefa.pop(-1)
+                    syllables_sinalefa.append(merged_syllables)
                 else:
-                    merged_syllables.append(self.word_syllables[index])
+                    syllables_sinalefa.append(self.word_syllables[index])
             except IndexError:
-                merged_syllables.append(self.word_syllables[index])
+                # we reached the last word
+                syllables_sinalefa.append(self.word_syllables[index])
             finally:
                 index += 1
 
-        return merged_syllables
-
-    def group_sinalefas(self, indexes):
-        sinalefa = []
-        for i in range(len(indexes) - 1):
-            if indexes[i][1] == indexes[i+1][0]:
-                sinalefa.append((indexes[i][0], indexes[i+1][1]))
-            else:
-                sinalefa.append(indexes[i])
-
-        print(sinalefa)
-        return sinalefa
-
-    def merge_syllables(self, sinalefa_at_index):
-        merged_syllables = []
-        popped = False
-        for index in range(len(self.word_syllables)):
-            try:
-                if index == sinalefa_at_index[0][0]:
-                    if popped:
-                        merged_syllables.append(self.word_syllables[index+1])
-                        popped = False
-                    else:
-                        syllable = self.word_syllables[index] + self.word_syllables[index+1]
-                        merged_syllables.append(syllable)
-                        popped = True
-                else:
-                    merged_syllables.append(self.word_syllables[index])
-            except IndexError:
-                merged_syllables.append(self.word_syllables[index])
-
-        return merged_syllables
-
-    def apply_sinalefa2(self):
-        syllables = self.word_syllables[:]
-        sinalefa_syllables = []
-        index = 0
-        traversed = False
-        previous_sinalefa = False
-        while not traversed:
-            print('index', index)
-            print('syllables', syllables,'\nsyllables[index]', syllables[index])
-            try:
-                if self.are_vowels(syllables[index][-1], syllables[index+1][0]):
-                    print(syllables[index], syllables[index+1])
-                    merged_syllables = syllables[index] + syllables[index+1]
-                    if previous_sinalefa:
-                        sinalefa_syllables.append(syllables[index+1])
-                    else:
-                        sinalefa_syllables.append(merged_syllables)
-                        previous_sinalefa = True
-                    #sinalefa_syllables[index] = sinalefa_syllables[-1] + syllables[index]
-                    #syllables.pop(index)
-                    #index += 1
-                else:
-                    sinalefa_syllables.append(syllables[index])
-                    if index > len(self.word_syllables):
-                        traversed = True
-                index += 1
-            except IndexError:
-                sinalefa_syllables.append(syllables[index])
-                break
-
-        print(sinalefa_syllables)
-        quit()
-
-    def apply_sinalefa(self):
-        # applying hard sinalefa
-        all_syllables = self.get_all_syllables()
-        index = 0
-        traversed = False
-        while not traversed:
-            try:
-                if self.is_sinalefa(all_syllables[index][-1], all_syllables[index + 1][0]):
-                    all_syllables[index] = self.merge_words(all_syllables, index, index+1)
-                    all_syllables.pop(index+1)
-                else:
-                    index += 1
-                    if index == len(all_syllables):
-                        traversed = True
-            except IndexError:
-                break
-
-        return '-'.join(all_syllables)
-
-    def merge_words(self, all_syllables, index1, index2):
-        merged = all_syllables[index1] + all_syllables[index2]
-        return merged
-
-    def get_all_syllables(self):
-        all_syllables = []
-        for word in self.word_syllables:
-            if len(word.split('-')) > 1:
-                all_syllables.extend(word.split('-'))
-            else:
-                all_syllables.append(word)
-
-        return all_syllables
+        return '-'.join(syllables_sinalefa)
 
     def are_vowels(self, c1, c2):
-        pattern = re.compile(f"[{''.join(self.vowels)}]")
-        if re.match(pattern, c1) and re.match(pattern, c2):
-            return True
-        else:
-            return False
-
-    def is_sinalefa(self, c1, c2):
+        """
+        function that compares if two characters are vowels.
+        it returns true if so, otherwise false.
+        """
         pattern = re.compile(f"[{''.join(self.vowels)}]")
         if re.match(pattern, c1) and re.match(pattern, c2):
             return True
@@ -398,10 +292,3 @@ if __name__ == '__main__':
     silabeador.sinalefa = True  # counting using sinalefa
     silabeador.count_syllables_sentence(text[3])
     #silabeador.count_syllables_text(text)
-
-    #def merge_words(self, sentence):
-    #    sentence_merged = re.sub(r' ', '', sentence)  # removing white spaces
-    #    punctuation_pattern = re.compile(f"[{''.join(self.punctuation)}]")
-    #    merged_words = re.split(punctuation_pattern, sentence_merged)
-
-    #    return merged_words

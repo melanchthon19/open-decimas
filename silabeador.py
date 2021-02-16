@@ -17,12 +17,13 @@ import preprocess
 class Silabeador():
     def __init__(self, verbose=1, **ph):
         '''
-        Silabeador class takes a sentence as input
-        and gets its number of metric syllables.
+        Silabeador class counts metric syllables in a text.
+        Its main function is count_syllables_sentence(sentence)
         along with other relevant information throughout the process.
-        Its main function is count_syllables()
         '''
         self.verbose = verbose  # to print out the result of each function.
+        # verbose == 1: prints out the sentence and syllable's number retrieved.
+        # verbose == 2: prints out the result of every function.
 
         # relevant phonetics information used to separate the sentence into metric syllables.
         self.vowels = ph['vowels']
@@ -48,7 +49,7 @@ class Silabeador():
                           'accent': None,\
                           'rithm': None}
 
-        self.sinalefa = False  # bools to activate (True) sinalefa
+        self.sinalefa = False  # bool to count using sinalefa
 
     def count_syllables_text(self, text):
         syllables_text = []
@@ -57,21 +58,27 @@ class Silabeador():
 
     def count_syllables_sentence(self, sentence):
         '''
-        function that takes a sentence and counts the number of metric syllables
+        main function that takes a sentence as input and counts the number of metric syllables
         input: string
         output: number of syllables
         '''
         self.sentence = sentence.split()
 
+        # converting characters to phonemes (i.e. 'cazar' --> 'kasar')
         self.phonemes = [self.word2phonemes(word) for word in self.sentence]
+        # converting phonemes to structure (i.e. 'kasar' --> 'CFCFC')
         self.structure = [self.phonemes2structure(word) for word in self.phonemes]
 
+        # dividing the structure in syllables (i.e. 'CFCFC' --> CF-CFC)
         self.structure_syllables = [self.divide_structure_syllables(word) for word in self.structure]
+        # dividing the word in syllables according to how the structure was previously divided (i.e. 'cazar' --> 'ca-zar')
         self.word_syllables = [self.add_separator(structure, word) for structure, word in zip(self.structure_syllables, self.phonemes)]
-        self.last_word = self.get_last_word()  # metric rules are considered when counting syllables in a sentence
+        # metric rules are considered when counting syllables in a sentence
+        self.last_word = self.get_last_word()
 
-        if self.sinalefa:
-            self.word_syllables = self.apply_sinalefa()
+        if self.sinalefa:  # applying sinalefa (i.e. 'vuel-ta-y-me-dia' --> 'vuel-tay-me-dia')
+            print(self.word_syllables)
+            self.word_syllables = self.apply_sinalefa3()
 
         self.number_syllables = self.count(self.word_syllables, self.metric_rule(self.last_word))
 
@@ -92,7 +99,102 @@ class Silabeador():
             print('is last word monosilabo:', self.last_word['monosilabo'])
             print('number of metric syllables', self.number_syllables)
 
-        return self.number_syllables  # amount of syllables in the sentence
+        return self.number_syllables  # amount of metric syllables in the sentence
+
+    def apply_sinalefa3(self):
+        sinalefa_at_index = []
+        for index in range(len(self.word_syllables) - 1):
+            if self.are_vowels(self.word_syllables[index][-1], self.word_syllables[index+1][0]):
+                sinalefa_at_index.append((index, index+1))
+        print(sinalefa_at_index)
+
+        sinalefa_at_index = self.group_sinalefas(sinalefa_at_index)
+
+        merged_syllables = self.merge_syllables2(sinalefa_at_index)
+
+        quit()
+
+    def merge_syllables2(self, indexes):
+        merged_syllables = []
+        index = 0
+        while index in range(len(self.word_syllables)):
+            try:
+                if index == indexes[0][0]:
+                    merged = ''.join(self.word_syllables[index:indexes[0][1]+1])
+                    merged_syllables.append(merged)
+                    index = indexes.pop(0)[1]
+                else:
+                    merged_syllables.append(self.word_syllables[index])
+            except IndexError:
+                merged_syllables.append(self.word_syllables[index])
+            finally:
+                index += 1
+
+        return merged_syllables
+
+    def group_sinalefas(self, indexes):
+        sinalefa = []
+        for i in range(len(indexes) - 1):
+            if indexes[i][1] == indexes[i+1][0]:
+                sinalefa.append((indexes[i][0], indexes[i+1][1]))
+            else:
+                sinalefa.append(indexes[i])
+
+        print(sinalefa)
+        return sinalefa
+
+    def merge_syllables(self, sinalefa_at_index):
+        merged_syllables = []
+        popped = False
+        for index in range(len(self.word_syllables)):
+            try:
+                if index == sinalefa_at_index[0][0]:
+                    if popped:
+                        merged_syllables.append(self.word_syllables[index+1])
+                        popped = False
+                    else:
+                        syllable = self.word_syllables[index] + self.word_syllables[index+1]
+                        merged_syllables.append(syllable)
+                        popped = True
+                else:
+                    merged_syllables.append(self.word_syllables[index])
+            except IndexError:
+                merged_syllables.append(self.word_syllables[index])
+
+        return merged_syllables
+
+    def apply_sinalefa2(self):
+        syllables = self.word_syllables[:]
+        sinalefa_syllables = []
+        index = 0
+        traversed = False
+        previous_sinalefa = False
+        while not traversed:
+            print('index', index)
+            print('syllables', syllables,'\nsyllables[index]', syllables[index])
+            try:
+                if self.are_vowels(syllables[index][-1], syllables[index+1][0]):
+                    print(syllables[index], syllables[index+1])
+                    merged_syllables = syllables[index] + syllables[index+1]
+                    if previous_sinalefa:
+                        sinalefa_syllables.append(syllables[index+1])
+                    else:
+                        sinalefa_syllables.append(merged_syllables)
+                        previous_sinalefa = True
+                    #sinalefa_syllables[index] = sinalefa_syllables[-1] + syllables[index]
+                    #syllables.pop(index)
+                    #index += 1
+                else:
+                    sinalefa_syllables.append(syllables[index])
+                    if index > len(self.word_syllables):
+                        traversed = True
+                index += 1
+            except IndexError:
+                sinalefa_syllables.append(syllables[index])
+                break
+
+        print(sinalefa_syllables)
+        quit()
 
     def apply_sinalefa(self):
         # applying hard sinalefa
@@ -126,6 +228,13 @@ class Silabeador():
                 all_syllables.append(word)
 
         return all_syllables
+
+    def are_vowels(self, c1, c2):
+        pattern = re.compile(f"[{''.join(self.vowels)}]")
+        if re.match(pattern, c1) and re.match(pattern, c2):
+            return True
+        else:
+            return False
 
     def is_sinalefa(self, c1, c2):
         pattern = re.compile(f"[{''.join(self.vowels)}]")
@@ -278,6 +387,7 @@ class Silabeador():
 
         return total_syllables
 
+
 if __name__ == '__main__':
 
     # ph is a dictionary with information regarding vowels, alphabet, char2phone rules, etc.
@@ -286,8 +396,8 @@ if __name__ == '__main__':
 
     silabeador = Silabeador(**ph)
     silabeador.sinalefa = True  # counting using sinalefa
-    silabeador.count_syllables_sentence(text[1])
-    silabeador.count_syllables_text(text)
+    silabeador.count_syllables_sentence(text[3])
+    #silabeador.count_syllables_text(text)
 
     #def merge_words(self, sentence):
     #    sentence_merged = re.sub(r' ', '', sentence)  # removing white spaces

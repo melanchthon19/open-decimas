@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import PyPDF2
 
 
-class Scrap_Decimas():
+class ScrapDecimas():
     def __init__(self):
         self.versos = []
 
@@ -80,7 +80,7 @@ class Scrap_Decimas():
                 file.write(f'{verso}\n')
 
 
-SD = Scrap_Decimas()
+SD = ScrapDecimas()
 SD.scrap_cervantes()
 SD.scrap_diferentemente()
 SD.scrap_violeta()

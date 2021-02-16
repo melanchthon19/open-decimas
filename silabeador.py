@@ -56,7 +56,7 @@ class Silabeador():
         for line in text:
             syllables_text.append(self.count_syllables_sentence(line))
 
-    def count_syllables_sentence(self, sentence):
+    def count_syllables_sentence(self, sentence, debug=False):
         '''
         main function that takes a sentence as input and counts the number of metric syllables
         input: string
@@ -70,7 +70,7 @@ class Silabeador():
         self.structure = [self.phonemes2structure(word) for word in self.phonemes]
 
         # dividing the structure in syllables (i.e. 'CFCFC' --> CF-CFC)
-        self.structure_syllables = [self.divide_structure_syllables(word) for word in self.structure]
+        self.structure_syllables = [self.divide_structure_syllables(word_structure) for word_structure in self.structure]
         # dividing the word in syllables according to how the structure was previously divided (i.e. 'cazar' --> 'ca-zar')
         self.word_syllables = [self.add_separator(structure, word) for structure, word in zip(self.structure_syllables, self.phonemes)]
         # metric rules are considered when counting syllables in a sentence
@@ -81,22 +81,27 @@ class Silabeador():
 
         self.number_syllables = self.count(self.word_syllables, self.metric_rule(self.last_word))
 
+        if debug and self.number_syllables != 8:
+            print(sentence)
+
         if self.verbose == 1:
-            print(sentence, self.word_syllables, self.number_syllables)
+            print(f'{sentence} --> {self.word_syllables} [{self.number_syllables}]')
 
         elif self.verbose == 2:# and self.number_syllables != 8:  # add second condition for debugging purposes
-            print('sentence', self.sentence)
+            print('\nsentence', sentence)
             print('phonemes', self.phonemes)
             print('structure', self.structure)
             print('structure syllables', self.structure_syllables)
             print('word syllables', self.word_syllables)
+            print('number of metric syllables', self.number_syllables)
+
+        elif self.verbose == 3:
             print('last word:', self.last_word['word'])
             print('last word structure', self.last_word['structure'])
             print('last word phonemes', self.last_word['phonemes'])
             print('last word syllables', self.last_word['word_syllables'])
             print('last word accent:', self.last_word['accent'])
             print('is last word monosilabo:', self.last_word['monosilabo'])
-            print('number of metric syllables', self.number_syllables)
 
         return self.number_syllables  # amount of metric syllables in the sentence
 
@@ -138,6 +143,10 @@ class Silabeador():
             return False
 
     def word2phonemes(self, word):
+        """
+        function that takes a word and translates it to phonemes
+        following the rules from char2phone dictionary
+        """
         # findall retrieves a list of characters only
         phonemes = ''.join(re.findall('[^\W]*', word))  # TODO: deal with punctuation in the middle of sentence
         for rule in self.char2phone.keys():  # certain rules must be applied first
@@ -148,20 +157,31 @@ class Silabeador():
         return phonemes
 
     def phonemes2structure(self, phonemes):
+        """
+        function that takes a sequence of phonemes and translates it to its structure
+        following the mapping in phonemes_dict dictionary.
+        double consonants are mapped to just one structure character 'T'
+        """
+        #print(phonemes)
         phonemes_reduced = self.reduce_double_syllables(phonemes)
         structure = [self.phonemes_dict[phone] if phone in self.alphabet else phone for phone in phonemes_reduced]
+        #print(structure)
         return structure
 
-    def divide_structure_syllables(self, word):
-        sequence = ''.join(word)
-        pattern = re.compile(r"""(CDDC(?![FAD]))?
-                                 (CDAC(?![FAD]))?
+    def divide_structure_syllables(self, word_structure, debug=False):
+        sequence = ''.join(word_structure)
+        pattern = re.compile(r"""(CDDC(?![AFD]))?
+                                 (CDAC(?![AFD]))?
+                                 (CFDC)?
                                  (CDD)?
                                  (CDFC(?![AFD]))?
                                  (CDF)?
+                                 (CDA)?
                                  (CDC(?![AFD]))?
                                  (DFC)?
                                  (CCF)?
+                                 (CFC(?![AFD]))?
+                                 (CAC(?![AFD]))?
                                  (TFC(?![AFD]))?
                                  (CFT(?![AFD]))?
                                  (CFC(?![AFD]))?
@@ -172,16 +192,23 @@ class Silabeador():
                                  (TD)?
                                  (TAC)?
                                  (TA)?
-                                 (FC(?![FAD]))?
+                                 (FC(?![AFD]))?
+                                 (FC(?![AFD]))?
+                                 (FD)?
                                  (CD(?![AFD]))?
                                  (DC(?=[CT]))?
-                                 (CA)?
-                                 (F(?=C[FAD])?)?
+                                 (CA(?![CT]))?
+                                 (F(?=C[AFD])?)?
                                  (A)?
-                                 (D)?""", re.VERBOSE)
+                                 (D)?
+                                 """, flags=re.VERBOSE)
         match = re.findall(pattern, sequence)
         structure_syllables = '-'.join([syllable for group in match for syllable in group if syllable])
-
+        if debug:
+            print('word structure', word_structure)
+            print('sequence', sequence)
+            print('match', match)
+            print('structure syllable', structure_syllables)
         return structure_syllables
 
     def reduce_double_syllables(self, word):
@@ -193,17 +220,26 @@ class Silabeador():
 
         return ''.join(word)
 
-    def add_separator(self, structure, word):
+    def add_separator(self, structure, word, debug=False):
+        """
+        function that adds a hyphen to separate the word's syllables.
+        it takes a separated structure (i.e. F-F-CF) and its word ('aora')
+        and it inserts the hyphens ('aora' --> 'a-o-ra').
+        Special cases are structure T which stands for double consonants (i.e. 'ns', 'tr')
+        thus these cases are mapped to two characters.
+        """
         word_segmented = list(word)
         char = 0
         forward = 0
-
-        while char < len(word_segmented) - 1:
+        while char < len(structure) - 1:
             if structure[char] == '-':
                 word_segmented.insert(char + forward, '-')
             elif structure[char] == 'T':
                 forward += 1  # moving one forward because T is mapped to two characters
             char += 1
+
+        if debug:
+            print(structure, word, word_segmented, ''.join(word_segmented))
 
         return ''.join(word_segmented)
 
@@ -287,8 +323,13 @@ if __name__ == '__main__':
     # ph is a dictionary with information regarding vowels, alphabet, char2phone rules, etc.
     ph = phonetics.phonetics
     text = preprocess.read_txt('data/decima2.txt')
+    #text = preprocess.read_txt('cases.txt')
+    #text = preprocess.read_txt('data/decimas_data_small.txt')
 
     silabeador = Silabeador(**ph)
     silabeador.sinalefa = True  # counting using sinalefa
-    silabeador.count_syllables_sentence(text[3])
-    #silabeador.count_syllables_text(text)
+    #silabeador.count_syllables_sentence(text[11])
+    silabeador.count_syllables_text(text)
+    #silabeador.count_syllables_sentence('pidió el cid alojamiento')
+    #silabeador.divide_structure_syllables(['C', 'F', 'C', 'F', 'D', 'C'], debug=True)
+    #silabeador.add_separator('CF-CA-F', 'maría', debug=True)

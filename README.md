@@ -23,13 +23,13 @@ tan sabios conocimientos --> tan-sa-bios-ko-no-si-mien-tos [8]\
 no recayeron en hijos --> no-re-ka-ie-ron-en-i-xos [8]\
 con un misterio prolijo --> kon-un-mis-te-rio-pro-li-xo [8]\
 pasan directo a los nietos --> pa-san-di-rek-toa-los-nie-tos [8]\
-en lo cual yo no les miento --> en-lo-kual-io-no-les-mien-to [8]\ 
+en lo cual yo no les miento --> en-lo-kual-io-no-les-mien-to [8]\
 tengo la prueba en la mano --> ten-go-la-prue-baen-la-ma-no [8]\
 yo les presento a mi hermano --> io-les-pre-sen-toa-mier-ma-no [8]\
 como el más bonito ejemplo --> ko-moel-más-bo-ni-toe-xem-plo [8]\
 si ahora no tiene un templo --> sia-o-ra-no-tie-neun-tem-plo [8]\
 lo tendrá tarde o temprano --> lo-ten-drá-tar-deo-tem-pra-no [8]\
-muy revueltita después --> mui-re-buel-ti-ta-des-pués [8]\
+muy revueltita después --> mui-re-buel-ti-ta-des-pués [8]
 
 TODO:
 - word-embeddings

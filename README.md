@@ -108,6 +108,7 @@ cuando la mas lejos volvía
 - sinéresis
 - diéresis
 - rhyme. 
+
 **Payador:**
 - try different techniques for generating a poem
 - constraint number of syllables using Silabeador

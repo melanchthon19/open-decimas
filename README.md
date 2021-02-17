@@ -1,10 +1,18 @@
 # open-decimas
 
+*-- work in progress --*
+
 Are machines able to write decimas? Let's find out.
 
 <img src="https://user-images.githubusercontent.com/61199264/103969615-34d3bf00-515e-11eb-8a62-e6c0fb96e760.png" width="480">
 
 In order to generate decimas, two main classes are used: **Silabeador** that counts metric syllables and **Payador** that generates a poem.
+
+## Usage
+
+First of all, you need to clone this repo and in the same folder get BETO working. Follow this [notebook](https://colab.research.google.com/drive/1uRwg4UmPgYIqGYY4gW_Nsw9782GFJbPt#scrollTo=9KXo6-ahoJoM) from the [BETO repository](https://github.com/dccuchile/beto) to make sure that it is working. A foldeer named `pytorch` should have been created (this is where the BETO model lives).
+
+Further details to come.
 
 ## Silabeador
 

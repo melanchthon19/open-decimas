@@ -4,11 +4,13 @@ Are machines able to write decimas? Let's find out.
 
 <img src="https://user-images.githubusercontent.com/61199264/103969615-34d3bf00-515e-11eb-8a62-e6c0fb96e760.png" width="480">
 
-Image from: https://www.patrimoniocultural.gob.cl/614/w3-article-5398.html?_noredirect=1
+## Silabeador
 
-Examples:
+Silabeador is the main class that counts metric syllables of a given sentence.
 
-**Violeta Parra - De tal palo, tal astilla**\
+For each sentence, it converts the raw ortography to phonemes, then to its underlying structure, it separates each syllable according to the structure, and finally it adds a hyphen as a separator to the raw ortography. An example is shown below:
+
+**Example: Violeta Parra - De tal palo, tal astilla**\
 de tal palo, tal astilla --> de-tal-pa-lo-tal-as-ti-La [8]\
 se dequivoca el refrán --> se-de-ki-bo-kael-re-frán [8]\
 solo le cuadra a san juan --> so-lo-le-kua-draa-san-xuan [8]\
@@ -31,9 +33,21 @@ si ahora no tiene un templo --> sia-o-ra-no-tie-neun-tem-plo [8]\
 lo tendrá tarde o temprano --> lo-ten-drá-tar-deo-tem-pra-no [8]\
 muy revueltita después --> mui-re-buel-ti-ta-des-pués [8]
 
-TODO:
-- word-embeddings
+When counting syllables, it applies sinalefa, the poetic license to merge two vowels from contigous words into one syllable. For example, `pre-sen-to-a-mi-er-ma-no` would be `pre-sen-toa-mier-ma-no`.
+
+## Payador
+
+
+
+
+## TODO:
 - further preprocessing for non-alphabetic characters
 - non-spanish words
 - sinéresis
 - diéresis
+- try different techniques for generating a poem
+- rhyme
+
+## Credits
+Image from: https://www.patrimoniocultural.gob.cl/614/w3-article-5398.html?_noredirect=1
+BETO model from: https://github.com/dccuchile/beto

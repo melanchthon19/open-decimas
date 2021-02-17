@@ -83,7 +83,6 @@ if __name__ == '__main__':
     #word_POS = dict(sorted(vocabulary.word_POS.items(), key=lambda x: x[0][0], reverse=True))
     #print(vocabulary.POS2word)
 
-
     # POS tag frequencies
     raw_count = pd.DataFrame(0, columns=range(int(vocabulary.mean_POS_length)), index=vocabulary.POS2word)
     postag_freq = pd.DataFrame(0, columns=range(int(vocabulary.mean_POS_length)), index=vocabulary.POS2word)

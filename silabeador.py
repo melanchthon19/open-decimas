@@ -7,11 +7,6 @@ import sys
 import phonetics
 import preprocess
 
-# TODO:
-# apply: 1) sinalefa, 2) diéresis, 3) sinéresis
-# sinéresis: dos vocales que no forman diptongo, forman diptongo. (e.g. gor-je-ar --> gor-jear)
-# diéresis: se separan dos vocales que forman diptongo. (e.g. sua-ve --> su-a-ve)
-# sinalefa: dos vocales de palabras contiguas se diptonguean. (e.g. cie-lo-y-mar --> cie-loy-mar)
 
 class Silabeador():
     def __init__(self, verbose=1, **ph):
@@ -332,3 +327,7 @@ if __name__ == '__main__':
     #silabeador.count_syllables_sentence('pidió el cid alojamiento')
     #silabeador.divide_structure_syllables(['C', 'F', 'C', 'F', 'D', 'C'], debug=True)
     #silabeador.add_separator('CF-CA-F', 'maría', debug=True)
+
+    # sinéresis: dos vocales que no forman diptongo, forman diptongo. (e.g. gor-je-ar --> gor-jear)
+    # diéresis: se separan dos vocales que forman diptongo. (e.g. sua-ve --> su-a-ve)
+    # sinalefa: dos vocales de palabras contiguas se diptonguean. (e.g. cie-lo-y-mar --> cie-loy-mar)

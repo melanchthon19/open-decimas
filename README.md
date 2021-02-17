@@ -4,13 +4,16 @@ Are machines able to write decimas? Let's find out.
 
 <img src="https://user-images.githubusercontent.com/61199264/103969615-34d3bf00-515e-11eb-8a62-e6c0fb96e760.png" width="480">
 
+In order to generate decimas, two main classes are used: **Silabeador** that counts metric syllables and **Payador** that generates a poem.
+
 ## Silabeador
 
 Silabeador is the main class that counts metric syllables of a given sentence.
 
 For each sentence, it converts the raw ortography to phonemes, then to its underlying structure, it separates each syllable according to the structure, and finally it adds a hyphen as a separator to the raw ortography. An example is shown below:
 
-**Example: Violeta Parra - De tal palo, tal astilla**\
+**Example: Violeta Parra - De tal palo, tal astilla**  
+
 de tal palo, tal astilla --> de-tal-pa-lo-tal-as-ti-La [8]\
 se dequivoca el refrán --> se-de-ki-bo-kael-re-frán [8]\
 solo le cuadra a san juan --> so-lo-le-kua-draa-san-xuan [8]\
@@ -37,17 +40,64 @@ When counting syllables, it applies sinalefa, the poetic license to merge two vo
 
 ## Payador
 
+Payador is the main class that generates a poem using BETO model. I will add further details of its implementation soon.
+
+Examples of generated poems:
+
+**1**  
+la casa tuya más profunda habita dónde  
+Sin razón ter es amor  
+quiero dar pre de celos  
+aquí nos enti enterrar ambos  
+más las or vas haciendo  
+cosas ti misma pasa toda  
+Nada somos insen del espíritu  
+sobre esos dichos tiempos era  
+del hecho tru la posibilidad  
+más hacer pues dos medidas  
+mediante así proceder posteriormente sucesivamente  
+dar entrada correspondiente sus órdenes  
+
+**2**  
+la casa trans si ni la hace  
+Pues otra nos cantar cuando  
+la en otras escuelas sé  
+para este mismo hecho esto  
+podrá contribuir su vida todo  
+un dolor exten ti tú  
+ir mano segura has prestado  
+le debo si dije silencio  
+vi Cuando tu ser conociste  
+Mi lengua ya respi respirando  
+hasta mirar af del nido  
+Porque da tu beso delicioso  
+
+**3**  
+la casa sino nadie se niega aún  
+por es van don tal  
+Quien pide ro está perdida  
+Como queriendo ref lle lo  
+que sin chist ten otro  
+El artículo puede consultar consentimiento  
+entre como letra particular adecuada  
+dos opciones geomé que bien  
+podrían generar multiplic trabajo resulta  
+así módulos ex plantas paralelas  
+que inter tre ella también  
+cuando la mas lejos volvía  
 
 
-
-## TODO:
+## TODO
+**Silabeador:**
 - further preprocessing for non-alphabetic characters
 - non-spanish words
 - sinéresis
 - diéresis
-- try different techniques for generating a poem
 - rhyme
+**Payador:**
+- try different techniques for generating a poem
+- constraint number of syllables using Silabeador
 
 ## Credits
-Image from: https://www.patrimoniocultural.gob.cl/614/w3-article-5398.html?_noredirect=1
+Image from: https://www.patrimoniocultural.gob.cl/614/w3-article-5398.html?_noredirect=1  
 BETO model from: https://github.com/dccuchile/beto

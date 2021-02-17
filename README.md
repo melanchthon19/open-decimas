@@ -10,7 +10,7 @@ In order to generate decimas, two main classes are used: **Silabeador** that cou
 
 ## Usage
 
-First of all, you need to clone this repo and in the same folder get BETO working. Follow this [notebook](https://colab.research.google.com/drive/1uRwg4UmPgYIqGYY4gW_Nsw9782GFJbPt#scrollTo=9KXo6-ahoJoM) from the [BETO repository](https://github.com/dccuchile/beto) to make sure that it is working. A foldeer named `pytorch` should have been created (this is where the BETO model lives).
+First of all, you need to clone this repo and in the same folder get BETO working. Follow this [notebook](https://colab.research.google.com/drive/1uRwg4UmPgYIqGYY4gW_Nsw9782GFJbPt#scrollTo=9KXo6-ahoJoM) from the [BETO repository](https://github.com/dccuchile/beto) to make sure that it is working. A folder named `pytorch` should have been created (this is where the BETO model lives).
 
 Further details to come.
 
@@ -18,7 +18,13 @@ Further details to come.
 
 Silabeador is the main class that counts metric syllables of a given sentence.
 
-For each sentence, it converts the raw ortography to phonemes, then to its underlying structure, it separates each syllable according to the structure, and finally it adds a hyphen as a separator to the raw ortography. An example is shown below:
+The following process is done to count syllables:
+- the raw ortography is translated to phonemes
+- phonemes are converted into their underlying structure (vowels or consonants)
+- the structure is separated in syllables using regex and adding a hyphen
+- a hyphen is added to the raw ortography as a separator
+ 
+An example is shown below:
 
 **Example: Violeta Parra - De tal palo, tal astilla**  
 
@@ -44,7 +50,7 @@ si ahora no tiene un templo --> sia-o-ra-no-tie-neun-tem-plo [8]\
 lo tendrá tarde o temprano --> lo-ten-drá-tar-deo-tem-pra-no [8]\
 muy revueltita después --> mui-re-buel-ti-ta-des-pués [8]
 
-When counting syllables, it applies sinalefa, the poetic license to merge two vowels from contigous words into one syllable. For example, `pre-sen-to-a-mi-er-ma-no` would be `pre-sen-toa-mier-ma-no`.
+When counting syllables, it applies sinalefa, the poetic license to merge two vowels from contiguous words into one syllable. For example, `pre-sen-to-a-mi-er-ma-no` would be `pre-sen-toa-mier-ma-no`.
 
 ## Payador
 
@@ -101,7 +107,7 @@ cuando la mas lejos volvía
 - non-spanish words
 - sinéresis
 - diéresis
-- rhyme
+- rhyme. 
 **Payador:**
 - try different techniques for generating a poem
 - constraint number of syllables using Silabeador

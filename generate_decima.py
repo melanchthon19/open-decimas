@@ -6,13 +6,17 @@ import numpy as np
 from string import punctuation
 import torch
 from transformers import BertForMaskedLM, BertTokenizer
-#from silabeador import Silabeador
+
 import silabeador
 import phonetics
 
 
 class Payador():
-    def __init__(self):
+    def __init__(self, ph):
+        # Initialize Silabeador to count generated syllables
+        self.silabeador = silabeador.Silabeador(**ph)
+        self.silabeador.sinalefa = True  # counting using sinalefa
+
         # Initialize BERTO
         self.tokenizer = BertTokenizer.from_pretrained("pytorch/", do_lower_case=False)
         self.model = BertForMaskedLM.from_pretrained("pytorch/")
@@ -28,10 +32,10 @@ class Payador():
 
     def generate_poem(self, N):
         text = self.generate_sentence(self.sentence)
-        print(text)
+        #print(text)
         n = 1
         while n <= N:  # generating a 12 line's poem
-            print(text)
+            #print(text)
             previous_sentence = re.findall(r'\[SEP\].*?\[SEP\]', text)
             # using the previous sentence as context for the new sentence
             if previous_sentence:
@@ -39,17 +43,18 @@ class Payador():
                 self.poem += previous_sentence
                 previous_sentence = previous_sentence.replace('[SEP]', '[CLS]', 1)
                 actual_text = previous_sentence + self.added_sentence
-                print('previous', previous_sentence)
+                #print('previous', previous_sentence)
                 actual_text = previous_sentence + self.added_sentence
             else:  # there is no previous sentence
                 self.poem += text
                 actual_text = text + self.added_sentence
 
-            print('actual', actual_text)
+            #print('actual', actual_text)
             text = self.generate_sentence(actual_text)
             n += 1
 
-        poem = self.clean_and_print(self.poem)
+        poem = self.clean(poem=self.poem)
+        self.print(poem)
 
         return poem
 
@@ -57,6 +62,7 @@ class Payador():
         tokens = [token for token in tokens if token != '[UNK]']
         #tokens = [token for token in tokens if token not in punctuation]
         tokens = [token for token in tokens if token.count('#') == 0]
+        tokens = [token for token in tokens if token.isalpha()]
         #tokens = [token for token in tokens if token in palabras_todas and len(token) > 1]
 
         if len([token for token in tokens if len(token) > 1]) > 0:
@@ -94,7 +100,7 @@ class Payador():
         initial_sentence = sentence[:]
         # use score to decide if sentence is "good" or "bad" given the LM
         if using_score:
-            score = 150  # set a score threshold
+            score = 150  # setting a score threshold
             # if generated sentence is greater than threshold, create another one
             while score >= 150:
                 masked_indxs = [index for index, word in enumerate(initial_sentence.split()) if re.match(r'\[MASK\]', word)]
@@ -110,17 +116,27 @@ class Payador():
             while masked_indxs:
                 sentence, masked_indxs = self.generate_word(sentence, masked_indxs)
 
+        sentence_cleaned = self.clean(sentence=sentence)
+        self.silabeador.count_syllables_sentence(sentence_cleaned)
+
         return sentence
 
-    def clean_and_print(self, poem):
-        poem = poem.replace('[CLS]', '')
-        poem = poem.replace('[SEP]', '\n')
-        poem = [line.strip() for line in poem.split('\n') if line]
+    def clean(self, poem=False, sentence=False):
+        if poem: text = poem
+        elif sentence: text = sentence
+
+        text = text.replace('[CLS]', '')
+        text = text.replace('[SEP]', '\n')
+        text = [line.strip() for line in text.split('\n') if line]
+
+        if poem: return text
+        elif sentence: return text[-1]
+
+    def print(self, poem):
         print('POEMA')
         for i, line in enumerate(poem):
             #print(line, self.score_sentence(line))
             print(line)
-        return poem
 
     def score_sentence(self, sentence):
         # function adapted from:
@@ -140,5 +156,6 @@ if __name__ == '__main__':
 
     # palabras del español --> https://github.com/JorgeDuenasLerin/diccionario-espanol-txt
 
-    payador = Payador()
+    ph = phonetics.phonetics
+    payador = Payador(ph)  # instantiates Payador class and Silabeador class within it
     payador.generate_poem(12)

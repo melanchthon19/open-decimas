@@ -9,7 +9,7 @@ import preprocess
 
 
 class Silabeador():
-    def __init__(self, verbose=2, **ph):
+    def __init__(self, verbose=1, **ph):
         '''
         Silabeador class counts metric syllables in a text.
         Its main function is count_syllables_sentence(sentence)
@@ -184,6 +184,7 @@ class Silabeador():
                                  (CF)?
                                  (DF)?
                                  (TD)?
+                                 (DT)?
                                  (TAC)?
                                  (TA)?
                                  (FC(?![AFD]))?
@@ -320,12 +321,12 @@ if __name__ == '__main__':
     #text = preprocess.read_txt('cases.txt')
     #text = preprocess.read_txt('data/decimas_data_small.txt')
 
-    silabeador = Silabeador(**ph)
+    silabeador = Silabeador(**ph, verbose=2)
     silabeador.sinalefa = True  # counting using sinalefa
     #silabeador.count_syllables_sentence(text[11])
     silabeador.count_syllables_text(text)
-    silabeador.count_syllables_sentence('profunda')
-    silabeador.divide_structure_syllables(['T', 'F', 'C', 'D', 'C', 'C', 'F'], debug=True)
+    silabeador.count_syllables_sentence('grupo')
+    #silabeador.divide_structure_syllables(['T', 'F', 'C', 'D', 'C', 'C', 'F'], debug=True)
     #silabeador.add_separator('CF-CA-F', 'maría', debug=True)
 
     # sinéresis: dos vocales que no forman diptongo, forman diptongo. (e.g. gor-je-ar --> gor-jear)

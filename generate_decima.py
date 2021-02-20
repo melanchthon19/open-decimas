@@ -12,45 +12,68 @@ import phonetics
 
 
 class Payador():
-    def __init__(self, ph):
+    def __init__(self, ph, verbose=0):
         # Initialize Silabeador to count generated syllables
-        self.silabeador = silabeador.Silabeador(**ph)
+        self.silabeador = silabeador.Silabeador(verbose, **ph)
         self.silabeador.sinalefa = True  # counting using sinalefa
 
-        # Initialize BERTO
+        # Initialize BETO
         self.tokenizer = BertTokenizer.from_pretrained("pytorch/", do_lower_case=False)
         self.model = BertForMaskedLM.from_pretrained("pytorch/")
         self.model.eval()
 
-        self.sentence = '[CLS] la casa [MASK] [MASK] [MASK] [MASK] [MASK] [SEP]'
-        self.added_sentence = ' [MASK] [MASK] [MASK] [MASK] [MASK] [SEP]'
+        self.number_masks = random.randint(3,5)
+        self.pie_forzado = 'la casa'
+        self.initial_sentence = self.beto_sentence()
         self.poem = ''
 
         #with open('palabras_todas.txt', 'r') as file:
         #    palabras_todas = file.readlines()
         #    palabras_todas = [palabra.strip() for palabra in palabras_todas]
 
+
+    def beto_sentence(self, sentence=False):
+        if not sentence:  # creating initial sentence
+            sentence = '[CLS] ' + self.pie_forzado + self.beto_added_sentence()
+
+        else:  # formatting sentence
+            sentence = '[CLS] ' + sentence + ' [SEP]'
+
+        return sentence
+
+    def beto_added_sentence(self):
+        masks_to_add = self.number_masks * '[MASK] '
+        return ' ' + masks_to_add + '[SEP]'
+
     def generate_poem(self, N):
-        text = self.generate_sentence(self.sentence)
-        #print(text)
-        n = 1
+        n = 0
+        previous_sentence = False
         while n <= N:  # generating a 12 line's poem
-            #print(text)
-            previous_sentence = re.findall(r'\[SEP\].*?\[SEP\]', text)
-            # using the previous sentence as context for the new sentence
-            if previous_sentence:
+            """
+            try:
+                previous_sentence = re.findall(r'\[SEP\].*?\[SEP\]', text)
                 previous_sentence = previous_sentence[-1]
                 self.poem += previous_sentence
                 previous_sentence = previous_sentence.replace('[SEP]', '[CLS]', 1)
-                actual_text = previous_sentence + self.added_sentence
-                #print('previous', previous_sentence)
-                actual_text = previous_sentence + self.added_sentence
+                actual_context = previous_sentence + self.added_sentence
+                text = self.generate_sentence(actual_context)
+            except UnboundLocalError:
+                pass
+            """
+            # using the previous sentence as context for the new sentence
+            if previous_sentence:
+                previous_sentence = re.findall(r'\[SEP\].*?\[SEP\]', text)
+                previous_sentence = previous_sentence[-1]
+                self.poem += previous_sentence
+                previous_sentence = previous_sentence.replace('[SEP]', '[CLS]', 1)
+                actual_context = previous_sentence + self.added_sentence
             else:  # there is no previous sentence
-                self.poem += text
-                actual_text = text + self.added_sentence
-
-            #print('actual', actual_text)
-            text = self.generate_sentence(actual_text)
+                first_line = self.generate_sentence(self.sentence)
+                self.poem += first_line
+                actual_context = first_line + self.added_sentence
+                previous_sentence = True
+                print(actual_context)
+            text = self.generate_sentence(actual_context)
             n += 1
 
         poem = self.clean(poem=self.poem)
@@ -82,7 +105,7 @@ class Payador():
         idxs = torch.argsort(predictions[0,focus_masked_indx], descending=True)
 
         # retrieving only the first 20 tokens
-        predicted_token = self.tokenizer.convert_ids_to_tokens(idxs[:200])
+        predicted_token = self.tokenizer.convert_ids_to_tokens(idxs[:50])
         #print('MASK:',predicted_token)
 
         # filtering retrieved tokens and choosing one token
@@ -157,5 +180,5 @@ if __name__ == '__main__':
     # palabras del español --> https://github.com/JorgeDuenasLerin/diccionario-espanol-txt
 
     ph = phonetics.phonetics
-    payador = Payador(ph)  # instantiates Payador class and Silabeador class within it
+    payador = Payador(ph, verbose=0)  # instantiates Payador class and Silabeador class within it
     payador.generate_poem(12)

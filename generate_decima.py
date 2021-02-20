@@ -6,6 +6,7 @@ import numpy as np
 from string import punctuation
 import torch
 from transformers import BertForMaskedLM, BertTokenizer
+#from silabeador import Silabeador
 import silabeador
 import phonetics
 

@@ -57,7 +57,6 @@ class Silabeador():
         output: number of syllables
         '''
         self.sentence = sentence.split()
-
         # converting characters to phonemes (i.e. 'cazar' --> 'kasar')
         self.phonemes = [self.word2phonemes(word) for word in self.sentence]
         # converting phonemes to structure (i.e. 'kasar' --> 'CFCFC')
@@ -79,7 +78,7 @@ class Silabeador():
             print(sentence)
 
         if self.verbose == 1:
-            print(f'{sentence} --> {self.word_syllables} [{self.number_syllables}]')
+            print(f'{" ".join(self.sentence)} --> {self.word_syllables} [{self.number_syllables}]')
 
         elif self.verbose == 2:# and self.number_syllables != 8:  # add second condition for debugging purposes
             print('\nsentence', sentence)
@@ -325,8 +324,8 @@ if __name__ == '__main__':
     silabeador.sinalefa = True  # counting using sinalefa
     #silabeador.count_syllables_sentence(text[11])
     silabeador.count_syllables_text(text)
-    silabeador.count_syllables_sentence('grupo')
-    #silabeador.divide_structure_syllables(['T', 'F', 'C', 'D', 'C', 'C', 'F'], debug=True)
+    silabeador.count_syllables_sentence('resultar')
+    silabeador.divide_structure_syllables(['C', 'F', 'C', 'D', 'C', 'C', 'F', 'C'], debug=True)
     #silabeador.add_separator('CF-CA-F', 'maría', debug=True)
 
     # sinéresis: dos vocales que no forman diptongo, forman diptongo. (e.g. gor-je-ar --> gor-jear)

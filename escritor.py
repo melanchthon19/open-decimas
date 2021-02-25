@@ -29,13 +29,13 @@ class Escritor():
 
         # Default parameters to generate different kind of texts
         self.pie_forzado = 'la casa'
-        self.min_words_line = 8
+        self.min_words_line = 5
         self.max_words_line = 12
         self.max_tokens = 20  # amount of possible tokens from which to choose
         self.score = 0  # if score is given, then it is used a threshold to accept or reject sentences
 
         # Initializing inner variables
-        self.initial_context = self.beto_sentence()
+        self.initial_context = ''
         self.text = []
 
     def beto_sentence(self, sentence=False):
@@ -66,8 +66,8 @@ class Escritor():
                 self.text.append(new_sentence)
 
             else:  # there is no previous sentence
+                self.initial_context = self.beto_sentence()
                 first_sentence = self.generate_sentence(self.initial_context)
-                #self.text.append(first_sentence.replace('[CLS] ', ''))
                 self.text.append(first_sentence)
                 previous_sentence = self.beto_sentence(first_sentence)
                 actual_context = previous_sentence + self.beto_added_sentence()

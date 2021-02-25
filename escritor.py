@@ -36,6 +36,8 @@ class Escritor():
 
         # Initializing inner variables
         self.initial_context = ''
+        self.actual_context = ''
+        self.previous_sentence = False
         self.text = []
 
     def beto_sentence(self, sentence=False):
@@ -54,24 +56,27 @@ class Escritor():
     def random_masks(self):
         return random.randint(self.min_words_line, self.max_words_line)
 
-    def generate_text(self, N):
+    def generate_text(self, N, given_context=False):
         n = 0
-        previous_sentence = False
-
         while n < N:  # generating an N line's text
+            if given_context:  # checking if previous context has been passed from other class
+                self.previous_sentence = True
+                self.actual_context = self.beto_sentence(given_context) + self.beto_added_sentence()
             # using the previous sentence as context for the new sentence
-            if previous_sentence:
-                new_sentence = self.generate_sentence(actual_context)
-                actual_context = self.beto_sentence(new_sentence) + self.beto_added_sentence()
+            if self.previous_sentence:
+                print(self.actual_context)
+                new_sentence = self.generate_sentence(self.actual_context)
+                #self.actual_context = self.beto_sentence(new_sentence) + self.beto_added_sentence()
                 self.text.append(new_sentence)
 
             else:  # there is no previous sentence
                 self.initial_context = self.beto_sentence()
                 first_sentence = self.generate_sentence(self.initial_context)
                 self.text.append(first_sentence)
-                previous_sentence = self.beto_sentence(first_sentence)
-                actual_context = previous_sentence + self.beto_added_sentence()
+                self.previous_sentence = self.beto_sentence(first_sentence)
+                #self.actual_context = self.previous_sentence + self.beto_added_sentence()
 
+            self.actual_context = self.beto_sentence(self.text[-1]) + self.beto_added_sentence()
             n += 1
 
         return self.text

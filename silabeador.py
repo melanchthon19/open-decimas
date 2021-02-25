@@ -324,8 +324,8 @@ if __name__ == '__main__':
     silabeador.sinalefa = True  # counting using sinalefa
     #silabeador.count_syllables_sentence(text[11])
     silabeador.count_syllables_text(text)
-    silabeador.count_syllables_sentence('resultar')
-    silabeador.divide_structure_syllables(['C', 'F', 'C', 'D', 'C', 'C', 'F', 'C'], debug=True)
+    silabeador.count_syllables_sentence('función')
+    #silabeador.divide_structure_syllables(['C', 'F', 'C', 'D', 'C', 'C', 'F', 'C'], debug=True)
     #silabeador.add_separator('CF-CA-F', 'maría', debug=True)
 
     # sinéresis: dos vocales que no forman diptongo, forman diptongo. (e.g. gor-je-ar --> gor-jear)

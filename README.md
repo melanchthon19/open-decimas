@@ -109,7 +109,7 @@ cuando la mas lejos volvía
 
 ## Rimador
 
-To come further details.
+Further details to come.
 
 ## TODO
 **Silabeador:**

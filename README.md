@@ -1,18 +1,27 @@
 # open-decimas
 
-*-- work in progress --*
-
 Are machines able to write decimas? Let's find out.
 
 <img src="https://user-images.githubusercontent.com/61199264/103969615-34d3bf00-515e-11eb-8a62-e6c0fb96e760.png" width="480">
 
-In order to generate decimas, two main classes are used: **Silabeador** that counts metric syllables and **Payador** that generates a poem.
+The following repo aims to generate decimas.
+
+The main class to generate decimas is **Payador**. It uses BETO model to generate verses starting from a "forced foot" of two words that give the initial context to BETO. After that, each previous verse is used as the context for the new verse.
+
+Modules used by Payador class could be used to extend this work for other purposes. A brief summary of each module:
+
+**Payador** uses the other modules to generate a decima or any text with the specified parameters.
+**Silabeador** counts metryc syllables of each word, sentence, or text.  
+**Rimador** accounts for rhymes within the poem, either "consonante" or "asonante". Besides decima's rhyme (ABBACCDDC), other rhymes could be used, such as ABBA.  
+**Escritor** calls BETO model to generate sentences.
 
 ## Usage
 
 First of all, you need to clone this repo and in the same folder get BETO working. Follow this [notebook](https://colab.research.google.com/drive/1uRwg4UmPgYIqGYY4gW_Nsw9782GFJbPt#scrollTo=9KXo6-ahoJoM) from the [BETO repository](https://github.com/dccuchile/beto) to make sure that it is working. A folder named `pytorch` should have been created (this is where the BETO model lives).
 
-Further details to come.
+Each class is callable by itself.
+
+As it is, `./payador.py`generates a decima (10 verses' long with ABBACCDDC rhyme).
 
 ## Silabeador
 
@@ -52,9 +61,7 @@ muy revueltita después --> mui-re-buel-ti-ta-des-pués [8]
 
 When counting syllables, it applies sinalefa, the poetic license to merge two vowels from contiguous words into one syllable. For example, `pre-sen-to-a-mi-er-ma-no` would be `pre-sen-toa-mier-ma-no`.
 
-## Payador
-
-Payador is the main class that generates a poem using BETO model. I will add further details of its implementation soon.
+## Escritor
 
 Examples of generated poems:
 
@@ -100,6 +107,9 @@ así módulos ex plantas paralelas
 que inter tre ella también  
 cuando la mas lejos volvía  
 
+## Rimador
+
+To come further details.
 
 ## TODO
 **Silabeador:**
@@ -107,11 +117,9 @@ cuando la mas lejos volvía
 - non-spanish words
 - sinéresis
 - diéresis
-- rhyme. 
 
-**Payador:**
+**Escritor:**
 - try different techniques for generating a poem
-- constraint number of syllables using Silabeador
 
 ## Credits
 Image from: https://www.patrimoniocultural.gob.cl/614/w3-article-5398.html?_noredirect=1  

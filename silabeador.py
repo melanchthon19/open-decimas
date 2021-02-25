@@ -28,7 +28,7 @@ class Silabeador():
         self.punctuation = ph['punctuation']
         self.double_consonants = ph['double_consonants']
 
-        # variables used within each count_syllables call
+        # variables used within each count_syllables_sentence call
         self.sentence = []
         self.phonemes = []
         self.structure = []
@@ -40,8 +40,7 @@ class Silabeador():
                           'structure': None,\
                           'word_syllables': None,\
                           'monosilabo': None,\
-                          'accent': None,\
-                          'rithm': None}
+                          'accent': None}
 
         self.sinalefa = False  # bool to count using sinalefa
 
@@ -97,6 +96,22 @@ class Silabeador():
             print('is last word monosilabo:', self.last_word['monosilabo'])
 
         return self.number_syllables  # amount of metric syllables in the sentence
+
+    def count_syllables_word(self, word):
+        self.sentence = word.split()
+        # converting characters to phonemes (i.e. 'cazar' --> 'kasar')
+        self.phonemes = [self.word2phonemes(word) for word in self.sentence]
+        # converting phonemes to structure (i.e. 'kasar' --> 'CFCFC')
+        self.structure = [self.phonemes2structure(word) for word in self.phonemes]
+
+        # dividing the structure in syllables (i.e. 'CFCFC' --> CF-CFC)
+        self.structure_syllables = [self.divide_structure_syllables(word_structure) for word_structure in self.structure]
+        # dividing the word in syllables according to how the structure was previously divided (i.e. 'cazar' --> 'ca-zar')
+        self.word_syllables = [self.add_separator(structure, word) for structure, word in zip(self.structure_syllables, self.phonemes)]
+        # metric rules are considered when counting syllables in a sentence
+        self.last_word = self.get_last_word()
+
+        return self.last_word
 
     def apply_sinalefa(self):
         """
@@ -206,9 +221,14 @@ class Silabeador():
         return structure_syllables
 
     def reduce_double_syllables(self, word):
+        # TODO: add some exceptions
         word = [char for char in word]
         for char in range(len(word)):
             if ''.join(word[char:char+2]) in self.double_consonants:
+                # add a more elegant exception here if double consonants 'ns' is followed by vowels or not.
+                # examples to fix: constitución (working), funsión (not working)
+                if re.search(r'nsi', ''.join(word)):
+                    continue
                 word[char] = 'T'
                 word.pop(char+1)
 
@@ -263,7 +283,7 @@ class Silabeador():
         else:  # accent == 'esdrujula':
             return -1
 
-    def acentuacion(self, phonemes, structure, monosilabo):
+    def acentuacion(self, phonemes, structure, monosilabo=False):
         '''
         checks if the word is aguda, grave or esdrujula.
         input: word as a tuple of its phonemes and structure.
@@ -280,7 +300,7 @@ class Silabeador():
 
         else:
             if monosilabo:
-                return 'none'
+                return 'none'  # ???
             elif phonemes[-1] in (self.vowels + ['n','s']):
                 return 'grave'
             else:
@@ -324,8 +344,8 @@ if __name__ == '__main__':
     silabeador.sinalefa = True  # counting using sinalefa
     #silabeador.count_syllables_sentence(text[11])
     silabeador.count_syllables_text(text)
-    silabeador.count_syllables_sentence('función')
-    #silabeador.divide_structure_syllables(['C', 'F', 'C', 'D', 'C', 'C', 'F', 'C'], debug=True)
+    silabeador.count_syllables_sentence('funsión')
+    #silabeador.divide_structure_syllables(['C', 'D', 'T', 'D', 'A', 'C'], debug=True)
     #silabeador.add_separator('CF-CA-F', 'maría', debug=True)
 
     # sinéresis: dos vocales que no forman diptongo, forman diptongo. (e.g. gor-je-ar --> gor-jear)

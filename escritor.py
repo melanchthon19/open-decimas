@@ -64,7 +64,7 @@ class Escritor():
                 self.actual_context = self.beto_sentence(given_context) + self.beto_added_sentence()
             # using the previous sentence as context for the new sentence
             if self.previous_sentence:
-                print(self.actual_context)
+                #print(self.actual_context)
                 new_sentence = self.generate_sentence(self.actual_context)
                 #self.actual_context = self.beto_sentence(new_sentence) + self.beto_added_sentence()
                 self.text.append(new_sentence)
